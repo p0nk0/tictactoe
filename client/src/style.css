@@ -1,0 +1,242 @@
+* {
+  box-sizing: border-box;
+} 
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --navbar-height: 50px;
+  --cell-size: 3rem;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.navbar-icon {
+  height: var(--navbar-height);
+  cursor: pointer;
+  font-size: 0.8rem;
+  user-select: none;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+
+.no-select {
+  user-select: none;
+}
+
+.homepage-painting {
+  height: 10rem;
+  width: 10rem;
+  border: 2px solid var(--navbar-fg);
+}
+
+.banner {
+  background-image: linear-gradient( 135deg, var(--fade-from) 10%, var(--fade-to) 100%);
+  padding-bottom: 1em;
+  height:18rem;
+}
+
+
+.grid-container {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) calc(100vw - var(--sidebar-width));
+  grid-template-rows: var(--navbar-height) 18rem calc(100vh - 18rem - var(--navbar-height));
+  transition: grid-template-columns var(--animation-duration);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.grid-item-navbar {
+  background-color: var(--navbar-bg);
+  color: var(--navbar-fg);
+  padding-left: 1em;
+  padding-right: 1em;
+  border-bottom: 1px solid var(--navbar-fg);
+  grid-row: 1;
+  grid-column: 1 / 3;
+  z-index: 1;
+  position:fixed;
+  top:0;
+  width:100vw;
+}
+
+.grid-item-entire-content {
+  grid-row: 2 / 3;
+  grid-column: 1 / 3;
+}
+
+.grid-item-entire-content-level-2 {
+  grid-row: 3 / 4;
+  grid-column: 1 / 3;
+}
+
+.grid-item-levels-2-and-3 {
+  grid-row: 2 / 4;
+  grid-column: 1 / 3;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% { 
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+	animation: spin 1s linear infinite;
+}
+
+.vsplit3 {
+  display: grid;
+  grid-template-columns: 33% 34% 33%;
+  grid-template-rows: 100%;
+  height: 100%;
+  width: 100%;
+}
+
+.homepage-column:not(:last-child) {
+  border-right: 1px solid var(--navbar-fg);
+}
+
+.homepage-column {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 2rem calc(100% - 2rem);
+} .homepage-column>div:first-child {
+  border-top: 1px solid var(--navbar-fg);
+  border-bottom: 1px solid var(--navbar-fg);
+  height: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.homepage-column>div:last-child {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.chip {
+  border-radius: 2px;
+  border-width: 1px;
+  border-style: solid;
+  padding: 2px;
+  transform: scale(0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #EECE13, #B210FF, #F05F57, #360940);
+	background-size: 400% 400%;
+	animation: gradient 8s ease infinite;
+  height: 100%;
+  width: 100%;
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+.pressed-button {
+  font-weight: bold;
+  color: white !important;
+  transition: font-weight 0.25s;
+}
+
+.create-game-section {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.table-full-width {
+  width: 100%;
+}
+
+.clickable-row:hover {
+  cursor: pointer;
+  filter: invert(100%);
+}
+
+.error-sad-face h3 {
+  color: tomato;
+}
+
+.game-error-page {
+  height: 100%;
+  padding-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.tic-tac-toe-board {
+  display:grid;
+  grid-template-columns: repeat(3, var(--cell-size));
+  grid-template-rows: repeat(3, var(--cell-size));
+  border: 1px solid var(--navbar-fg);
+}
+
+.omok-board {
+  display:grid;
+  grid-template-columns: repeat(15, var(--cell-size));
+  grid-template-rows: repeat(15, var(--cell-size));
+}
+
+.game-cell {
+  background-color: var(--navbar-bg);
+  border: 1px solid var(--navbar-fg);
+  display: flex;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.winning-game-cell {
+  background-image: linear-gradient( 135deg, var(--fade-from) 10%, var(--fade-to) 100%)
+}
+
+.surrounding-game-wrapper {
+  width: fit-content;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.clickable-cell:hover {
+  filter: invert(100%);
+}
+
+.ghost-piece {
+  display: none;
+}
+
+.clickable-cell:hover > .ghost-piece {
+  display: block;
+}
+
+.finished-game {
+  filter: brightness(50%);
+}

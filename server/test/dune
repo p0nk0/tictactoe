@@ -1,0 +1,3 @@
+(library (
+  (name jsip_tic_tac_toe_test)
+  (libraries core tic_tac_toe_2023_native tic_tac_toe_2023_common)))

@@ -1,0 +1,22 @@
+(library (
+  (name tic_tac_toe_2023_lib)
+  (libraries 
+    async_kernel
+    bonsai_web
+    core
+    inline_css
+    tic_tac_toe_2023_common
+    bonsai_web_ui_popover
+    bonsai_web_ui_form
+    uri_parsing
+    kado
+    feather_icon)
+  (modes js)
+  (preprocess (pps ppx_js ppx_css ppx_jane ppx_bonsai ppx_typed_fields))))
+
+(rule
+ (targets style.ml style.mli style__generated.ml
+  style__generated.mli)
+ (deps style.css)
+ (action (bash "%{bin:css_inliner} %{deps} \"((rewrite ()))\"")))
+

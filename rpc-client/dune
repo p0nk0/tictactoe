@@ -1,0 +1,3 @@
+(library (
+  (name tic_tac_toe_2023_rpc_client)
+  (libraries async rpc_websocket tic_tac_toe_2023_common filename_unix)))

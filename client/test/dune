@@ -1,0 +1,13 @@
+(library (
+  (name tic_tac_toe_2023_test)
+  (libraries 
+    async_kernel
+    tic_tac_toe_2023_lib
+    tic_tac_toe_2023_common
+    async_js_test
+    bonsai_web
+    bonsai_web_test
+    core
+    uri_parsing)
+  (modes js)
+  (preprocess pps ppx_js ppx_jane)))
