@@ -187,7 +187,7 @@ module Game_state = struct
           | Some X -> "X"
           | Some O -> "O")
         |> String.concat)
-      |> String.concat_lines
+      |> String.concat ~sep:"\n"
     in
     let top =
       [%message

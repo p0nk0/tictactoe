@@ -1,4 +1,5 @@
-(library (
+(library 
   (name tic_tac_toe_2023_native)
+  (preprocess (pps ppx_jane))
   (libraries 
-    cohttp_static_handler rpc_websocket tic_tac_toe_2023_common filename_unix)))
+    cohttp_static_handler async_rpc_websocket tic_tac_toe_2023_common core_unix))

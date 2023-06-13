@@ -15,7 +15,7 @@ let to_string_hum t =
     Sexp.to_string [%message (joinable_games : Joinable_game.t Game_id.Map.t)]
   in
   let running_games =
-    String.concat_lines (Map.data running_games |> List.map ~f:Game_state.to_string_hum)
+  String.concat ~sep:"\n" (Map.data running_games |> List.map ~f:Game_state.to_string_hum)
   in
   [%string "next_id: %{t.next_id#Int}\n%{joinable_games}\n%{running_games}"]
 ;;
