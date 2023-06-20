@@ -1,0 +1,78 @@
+* game_ai.exe
+
+: Bot-running command
+: 
+:   game_ai.exe SUBCOMMAND
+: 
+: === subcommands ===
+: 
+:   create-game-and-play       . Send off an rpc to create and game and then plays
+:                                the game, waiting for the other player to place
+:                                pieces
+:   create-game-and-play-against-self
+:                              . Send off an rpc to create and then immediately
+:                                start playing against itself
+:   join-game-and-play         . Send off an rpc to join a game and then randomly
+:                                places pieces using web socket rpc
+:   version                    . print version information
+:   help                       . explain a given subcommand (perhaps recursively)
+
+** version
+
+: print version information
+: 
+:   game_ai.exe version 
+: 
+: === flags ===
+: 
+:   [-build-info]              . print build info for this build
+:   [-version]                 . print the version of this build
+:   [-help], -?                . print this help text and exit
+
+** create-game-and-play
+
+: Send off an rpc to create and game and then plays the game, waiting for the other player to place pieces
+: 
+:   game_ai.exe create-game-and-play 
+: 
+: === flags ===
+: 
+:   -game-kind Tic_tac_toe     . | Omok - Difficulty of
+:   -host The                  . host to connect to
+:   -username STRING           . - your username, who to play as.
+:   [-against-bot Easy]        . | Medium | Hard - Difficulty of the server to
+:                                play against. If unset will leave game open for
+:                                someone else to join.
+:   [-port port]               . on which to serve
+:   [-refresh-rate How]        . often to poll for new game state
+:   [-help], -?                . print this help text and exit
+
+** create-game-and-play-against-self
+
+: Send off an rpc to create and then immediately start playing against itself
+: 
+:   game_ai.exe create-game-and-play-against-self 
+: 
+: === flags ===
+: 
+:   -game-kind Tic_tac_toe     . | Omok - Difficulty of
+:   -host The                  . host to connect to
+:   -username STRING           . - your username, who to play as.
+:   [-port port]               . on which to serve
+:   [-refresh-rate How]        . often to poll for new game state
+:   [-help], -?                . print this help text and exit
+
+** join-game-and-play
+
+: Send off an rpc to join a game and then randomly places pieces using web socket rpc
+: 
+:   game_ai.exe join-game-and-play 
+: 
+: === flags ===
+: 
+:   -game-id INT               . - Game ID to join.
+:   -host The                  . host to connect to
+:   -username STRING           . - your username, who to play as.
+:   [-port port]               . on which to serve
+:   [-refresh-rate How]        . often to poll for new game state
+:   [-help], -?                . print this help text and exit

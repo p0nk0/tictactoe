@@ -5,7 +5,7 @@ module Game_kind = struct
   type t =
     | Tic_tac_toe
     | Omok
-  [@@deriving sexp_of, equal, bin_io]
+  [@@deriving sexp, equal, bin_io]
 
   let to_string = Fn.compose Sexp.to_string_hum sexp_of_t
 
@@ -35,7 +35,7 @@ module Difficulty = struct
     | Easy
     | Medium
     | Hard
-  [@@deriving sexp_of, equal, bin_io]
+  [@@deriving sexp, equal, bin_io]
 
   let to_string = Fn.compose Sexp.to_string_hum sexp_of_t
 end
@@ -87,6 +87,7 @@ module Join_existing_game = struct
   module Response = struct
     type t =
       | Ok
+      | You've_already_joined_this_game
       | Game_does_not_exist
       | Game_already_full
       | Game_already_ended
@@ -113,7 +114,10 @@ module Piece = struct
   type t =
     | X
     | O
-  [@@deriving sexp_of, equal, bin_io]
+  [@@deriving sexp, equal, bin_io, enumerate]
+
+  let of_string = Fn.compose t_of_sexp Sexp.of_string
+  let to_string = Fn.compose Sexp.to_string_hum sexp_of_t
 
   let flip = function
     | X -> O
@@ -187,7 +191,7 @@ module Game_state = struct
           | Some X -> "X"
           | Some O -> "O")
         |> String.concat)
-      |> String.concat ~sep:"\n"
+      |> String.concat_lines
     in
     let top =
       [%message

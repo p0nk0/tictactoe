@@ -27,3 +27,30 @@ val take_turn
   -> Take_turn.Response.t Deferred.Or_error.t
 
 val me : t -> Username.t Deferred.Or_error.t
+
+type game_ai = me:Piece.t -> game_state:Game_state.t -> Position.t
+
+val create_game_and_play
+  :  t
+  -> me:Username.t
+  -> against:Difficulty.t option
+  -> game_kind:Game_kind.t
+  -> game_ai:game_ai
+  -> refresh_rate:Time_float.Span.t
+  -> unit Deferred.Or_error.t
+
+val join_game_and_play
+  :  t
+  -> game_id:Game_id.t
+  -> me:Username.t
+  -> game_ai:game_ai
+  -> refresh_rate:Time_float.Span.t
+  -> unit Deferred.Or_error.t
+
+val create_game_and_play_against_self
+  :  t
+  -> me:Username.t
+  -> game_kind:Game_kind.t
+  -> game_ai:game_ai
+  -> refresh_rate:Time_float.Span.t
+  -> unit Deferred.Or_error.t

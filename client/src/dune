@@ -13,12 +13,11 @@
     core
     ppx_css
     tic_tac_toe_2023_common)
-  ;;(modes js)
   (preprocess (pps ppx_css ppx_jane ppx_typed_fields bonsai.ppx_bonsai)))
+
 
 (rule
  (targets style.ml style.mli style__generated.ml
   style__generated.mli)
  (deps style.css)
  (action (bash "%{bin:css_inliner} %{deps} \"((rewrite ()))\"")))
-

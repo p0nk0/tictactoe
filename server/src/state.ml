@@ -15,7 +15,7 @@ let to_string_hum t =
     Sexp.to_string [%message (joinable_games : Joinable_game.t Game_id.Map.t)]
   in
   let running_games =
-  String.concat ~sep:"\n" (Map.data running_games |> List.map ~f:Game_state.to_string_hum)
+    String.concat_lines (Map.data running_games |> List.map ~f:Game_state.to_string_hum)
   in
   [%string "next_id: %{t.next_id#Int}\n%{joinable_games}\n%{running_games}"]
 ;;
@@ -97,9 +97,15 @@ let join_game t ~second_player ~game_id =
     (match Map.find t.world_state.running_games game_id with
      | None -> Game_does_not_exist
      | Some running_game ->
-       (match running_game.game_status with
-        | Game_status.Game_over _ -> Game_already_ended
-        | Game_status.Turn_of _ -> Game_already_full))
+       (match
+          List.exists [ running_game.player_o; running_game.player_x ] ~f:(fun player ->
+            Player.equal player (Player second_player))
+        with
+        | true -> You've_already_joined_this_game
+        | false ->
+          (match running_game.game_status with
+           | Game_status.Game_over _ -> Game_already_ended
+           | Game_status.Turn_of _ -> Game_already_full)))
 ;;
 
 let get_all_running_games t = t.world_state.running_games

@@ -1,0 +1,68 @@
+* tic_tac_toe_exercises.exe
+
+: Tic Tac Toe exercises
+: 
+:   tic_tac_toe_exercises.exe SUBCOMMAND
+: 
+: === subcommands ===
+: 
+:   exercise-four              . Exercise 4: Is there a losing move?
+:   exercise-one               . Exercise 1: Did is the game over?
+:   exercise-three             . Exercise 3: Is there a winning move?
+:   exercise-two               . Exercise 2: Where can I move?
+:   version                    . print version information
+:   help                       . explain a given subcommand (perhaps recursively)
+
+** version
+
+: print version information
+: 
+:   tic_tac_toe_exercises.exe version 
+: 
+: === flags ===
+: 
+:   [-build-info]              . print build info for this build
+:   [-version]                 . print the version of this build
+:   [-help], -?                . print this help text and exit
+
+** exercise-four
+
+: Exercise 4: Is there a losing move?
+: 
+:   tic_tac_toe_exercises.exe exercise-four 
+: 
+: === flags ===
+: 
+:   -piece PIECE               . X, O
+:   [-help], -?                . print this help text and exit
+
+** exercise-one
+
+: Exercise 1: Did is the game over?
+: 
+:   tic_tac_toe_exercises.exe exercise-one 
+: 
+: === flags ===
+: 
+:   [-help], -?                . print this help text and exit
+
+** exercise-three
+
+: Exercise 3: Is there a winning move?
+: 
+:   tic_tac_toe_exercises.exe exercise-three 
+: 
+: === flags ===
+: 
+:   -piece PIECE               . X, O
+:   [-help], -?                . print this help text and exit
+
+** exercise-two
+
+: Exercise 2: Where can I move?
+: 
+:   tic_tac_toe_exercises.exe exercise-two 
+: 
+: === flags ===
+: 
+:   [-help], -?                . print this help text and exit

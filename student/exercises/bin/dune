@@ -1,0 +1,3 @@
+(executables
+  (names tic_tac_toe_exercises)
+  (libraries command_unix core tic_tac_toe_2023_common tic_tac_toe_exercises_lib))

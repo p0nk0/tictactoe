@@ -1,9 +1,9 @@
 (executables 
-  (names main send_mock_rpc)
+  (names game_ai)
   (libraries 
     async
     tictactoe_game_ai
     core
-    tic_tac_toe_2023_native
+    tic_tac_toe_2023_common
     tic_tac_toe_2023_rpc_client
     command_unix))

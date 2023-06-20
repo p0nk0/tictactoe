@@ -223,7 +223,7 @@ let joinable_games ~set_url =
                Effect.print_s
                  [%message
                    "App-level error occurred." (error : Join_existing_game.Response.t)]
-             | Ok Ok -> set_url (Page.Game game_id))
+             | Ok (Ok | You've_already_joined_this_game) -> set_url (Page.Game game_id))
     in
     let%sub theme = View.Theme.current in
     let%arr joinable_games = joinable_games

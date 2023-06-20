@@ -8,7 +8,7 @@ module Game_kind : sig
   type t =
     | Tic_tac_toe
     | Omok
-  [@@deriving sexp_of, equal, bin_io]
+  [@@deriving sexp, equal, bin_io]
 
   val to_string : t -> string
   val to_string_hum : t -> string
@@ -21,7 +21,7 @@ module Difficulty : sig
     | Easy
     | Medium
     | Hard
-  [@@deriving sexp_of, equal, bin_io]
+  [@@deriving sexp, equal, bin_io]
 
   val to_string : t -> string
 end
@@ -64,6 +64,7 @@ module Join_existing_game : sig
   module Response : sig
     type t =
       | Ok
+      | You've_already_joined_this_game
       | Game_does_not_exist
       | Game_already_full
       | Game_already_ended
@@ -84,8 +85,10 @@ module Piece : sig
   type t =
     | X
     | O
-  [@@deriving sexp_of, equal, bin_io]
+  [@@deriving sexp, equal, bin_io, enumerate]
 
+  val of_string : string -> t
+  val to_string : t -> string
   val flip : t -> t
 end
 
