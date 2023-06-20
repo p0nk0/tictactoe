@@ -1,9 +1,10 @@
 (executables 
   (names game_ai)
+  (preprocess (pps ppx_jane))
   (libraries 
     async
     tictactoe_game_ai
     core
     tic_tac_toe_2023_common
     tic_tac_toe_2023_rpc_client
-    command_unix))
+    core_unix.command_unix))

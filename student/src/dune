@@ -1,4 +1,5 @@
 (library 
-  (name tic_tac_toe_2023_rpc_client)
+  (name tictactoe_game_ai)
+  (inline_tests)
   (preprocess (pps ppx_jane))
   (libraries async async_rpc_websocket tic_tac_toe_2023_common core_unix.filename_unix))

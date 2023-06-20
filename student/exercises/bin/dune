@@ -1,3 +1,4 @@
 (executables
   (names tic_tac_toe_exercises)
-  (libraries command_unix core tic_tac_toe_2023_common tic_tac_toe_exercises_lib))
+  (preprocess (pps ppx_jane))
+  (libraries core_unix.command_unix core tic_tac_toe_2023_common tic_tac_toe_exercises_lib))
