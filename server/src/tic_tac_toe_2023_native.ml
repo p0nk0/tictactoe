@@ -45,6 +45,7 @@ let main ~js_file ~port =
       ~initial_connection_state:initialize_connection
       ()
   in
+  print_endline [%string "Game server running on port %{port#Int}"];
   Cohttp_async.Server.close_finished server
 ;;
 

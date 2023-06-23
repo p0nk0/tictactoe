@@ -57,7 +57,7 @@ let cmd_create_game =
       "Send off an rpc to create and game and then plays the game, waiting for the other \
        player to place pieces"
     (let%map_open.Command port =
-       flag "port" (optional_with_default 8181 int) ~doc:"port on which to serve"
+       flag "port" (required int) ~doc:"port on which to serve"
      and host = flag "host" (required string) ~doc:"The host to connect to"
      and username = Flags.username
      and against = Flags.against

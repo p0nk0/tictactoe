@@ -120,7 +120,7 @@ code, and run the executable binary like this:
 $ cd tictactoe
 tictactoe$ dune build
 tictactoe$ dune runtest
-tictactoe$ _build/default/student/bin/game_ai.exe --help
+tictactoe$ dune exec student/bin/game_ai.exe help
 Bot-running command
 
   game_ai.exe SUBCOMMAND
@@ -143,4 +143,176 @@ Bot-running command
 > your hand, and ask for help, and we'll help you install your dependencies!
 > You might need to run `opam install $MISSING_LIBRARY`, but "opam" (OCaml's
 > package manager) can be a bit weird at times, so please raise your hand!
+
+## Directory Layout
+
+
+The files for these exercises are located within the `student` directory:
+
+```sh
+tictactoe$ tree student
+student
+├── bin
+│   ├── dune
+│   ├── game_ai-help-for-review.org
+│   ├── game_ai.ml
+│   └── game_ai.mli
+├── exercises
+│   ├── bin
+│   │   ├── dune
+│   │   ├── tic_tac_toe_exercises-help-for-review.org
+│   │   ├── tic_tac_toe_exercises.ml
+│   │   └── tic_tac_toe_exercises.mli
+│   └── src
+│       ├── dune
+│       ├── main.ml
+│       └── main.mli
+└── src
+    ├── dune
+    ├── tictactoe_game_ai.ml
+    └── tictactoe_game_ai.mli
+
+6 directories, 14 files
+```
+
+* `student/bin` contains the "game_ai" executable that you can use to run your bot.
+* `student/exercises` and `student/src` are where you'll be implemting your bot.
+
+### Game Server
+
+There are other directories like `server`, `rpc-client`, and more. These directories
+contain the "game server" that you can use to spectate your games!
+
+You can run the game server by running the `./run-game-server.sh` script:
+
+```
+tictactoe$ ./run-game-server.sh 
+Game server running on port 8080
+```
+
+You should then be able to navigate to: http://$YOUR_AWS_HOSTNAME:8080
+
+> NOTE: You can find your AWS hostname/IP addres by running `$ hostname -I`
+> TODO: Confirm that the above is true on the actual boxes.
+
+You should see a game server site like this:
+
+![Game Server](./images/game-server.jpg)
+
+> NOTE: If you can't see the above site, do not worry! We have a **shared web server**
+> hosted at here [todo](todo). It's hostname and port are: http://TODO_HOSTNAME:8181
+
+## Exercises!
+
+
+You can think of an AI that plays tic-tac-toe board as a "function" of type
+`me:Piece.t -> game_state:Game_state.t -> Position.t`.
+
+Where the `me` parameter is the "piece" that the bot is playing as, and
+`Game_state.t` is the state of the board (where all of the pieces are, and also
+the type of game you're playing (i.e. 3x3 tic-tac-toe vs. 15x15 Omok)), and the 
+returned position is the place you've picked to put your position.
+
+Over the course of these exercises you will be gradually such a function.
+
+### Exercise 1
+
+One question you might ask is: What if the game is already over? 
+Has someone already won? Is there a tie? Is a piece ready to be
+placed/does your place continue?
+
+
+Your task for exercise 1 is implementing:
+
+```ocaml
+val evaluate : game_kind:Game_kind.t -> pieces:Piece.t Position.Map.t -> Evaluation.t
+```
+
+where evaluation has the type:
+
+```ocaml
+module Evaluation = struct
+  type t =
+    | Illegal_state
+    | Game_over of { winner : Piece.t option }
+    | Game_continues
+end
+```
+You can implement this function in `student/exercises/src/main.ml`
+
+Feel free to - _at first_ - ignore the [game_kind] parameter and assume that
+it'll only work for tic-tac-toe, and not omok.
+
+> HINT: [Map] is a new OCaml module that you have not seen before! It is
+> OCaml's equivalent of python dictionaries, Java HashMap's or any languages's
+> "map". Available functions can be found here:
+> [Real World Ocaml](https://dev.realworldocaml.org/maps-and-hashtables.html).
+> and on [ocaml.org's docs page](https://ocaml.org/u/c208440793aa1aa9d82e70e53cad6da8/base/v0.15.0/doc/Base/Map/index.html).
+  > If map's/dictionaries are a new concept to you this is fine! Feel free to ask a TA
+  > for help/ask on the #questions slack channel if something is unclear!
+
+Here are some [*Map*] functions that you might find useful:
+
+```ocaml
+(** Returns [Some value] bound to the given [key], or [None] if none exists. *)
+val find : ('k, 'v, 'cmp) Map.t -> 'k -> 'v option
+
+(** [mem map key] tests whether map contains a binding for key. *)
+val mem : ('k, _, 'cmp) t -> 'k -> bool
+```
+
+> NOTE: The type `('k, 'v, 'cmp) Map.t` means a map from with keys of type
+> `'k` and values of type `'v`. For example, `(Position.t, Piece.t,
+> Position.comparator_witness) Map.t` is a map from `Position.t` to `Piece.t`.
+> The `'cmp` parameter is magical and you can mostly ignore it. If you're
+> interested, read about it on the "Real World OCaml" link above or ask a TA!
+> 
+> Something else weird syntax-wise is that the type `(Position.t, Piece.t,
+> Position.comparator_witness) Map.t` **is the same as**  `Piece.t Position.Map.t`.
+
+
+Additionally, there are some functions that might be helpful available 
+for operating on `Position.t`'s
+
+```ocaml
+module Position : sig
+  (* Top-left is {row = 0; column = 0}. *)
+  type t =
+    { row : int
+    ; column : int
+    }
+
+  val in_bounds : t -> game_kind:Game_kind.t -> bool
+  val equal : t -> t -> bool
+  
+  (** [down t] is [t]'s downwards neighbor. *)
+  val down : t -> t
+  val right : t -> t
+  val up : t -> t
+  val left : t -> t
+
+
+  (** [all_offsets] is a list of functions to compute all 8 neighbors of a
+      cell (i.e. left, up-left, up, up-right, right, right-down, down,
+      down-left). *)
+  val all_offsets : (t -> t) list
+end
+```
+
+> NOTE: [Position] is defined in `common/protocol.mli`.
+
+### Exercise 2
+
+Your AI _needs_ to make a choice of "which free available spot" it should
+put it's piece on. Let's find "all free positions!". Implement `available_moves`
+in `student/exercises/src/main.ml`
+
+```ocaml
+val available_moves : game_kind:Game_kind.t -> pieces:Piece.t Position.Map.t -> Position.t list
+```
+
+> HINT: Look for `Map.to_alist`/`Map.keys` in the [ocaml docs](https://ocaml.org/u/c208440793aa1aa9d82e70e53cad6da8/base/v0.15.0/doc/Base/Map/index.html), and also leverage `List.filter`.
+
+
+TODO(j): write instructions for exercises 3+4
 

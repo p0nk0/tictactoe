@@ -5,15 +5,11 @@ open Protocol
 module Evaluation = struct
   type t =
     | Illegal_state
-    | Win of Piece.t
+    | Game_over of { winner : Piece.t option }
     | Game_continues
   [@@deriving sexp_of]
 
   let to_string (t : t) = t |> sexp_of_t |> Sexp.to_string
-end
-
-module Possible_moves = struct
-  type t = Position.t list option [@@deriving sexp_of]
 end
 
 (* Here are some functions which know how to create a couple different kinds of games *)
@@ -58,23 +54,36 @@ let non_win =
   |> place_piece ~piece:Piece.O ~position:{ Position.row = 2; column = 0 }
 ;;
 
-let evaluate (game : Game_state.t) : Evaluation.t =
-  ignore game;
+
+(* Exercise 1.
+
+  For instructions on implemeting this refer to the README.
+
+  After you are done with this implementation, you can uncomment out
+  "evaluate" test cases found below in this file.
+ *)
+let evaluate ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.Map.t) : Evaluation.t =
+  ignore pieces;
+  ignore game_kind;
   failwith "Implement me!"
 ;;
 
-let available_moves (game : Game_state.t) : Possible_moves.t =
-  ignore game;
+(* Exercise 2. *)
+let available_moves ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.Map.t) : Position.t list =
+  ignore game_kind;
+  ignore pieces;
   failwith "Implement me!"
 ;;
 
-let winning_moves (game : Game_state.t) piece : Possible_moves.t =
+(* Exercise 3. *)
+let winning_moves (game : Game_state.t) piece : Position.t list =
   ignore game;
   ignore piece;
   failwith "Implement me!"
 ;;
 
-let losing_moves (game : Game_state.t) piece : Possible_moves.t =
+(* Exercise 4. *)
+let losing_moves (game : Game_state.t) piece : Position.t list =
   ignore game;
   ignore piece;
   failwith "Implement me!"
@@ -85,7 +94,7 @@ let exercise_one =
     ~summary:"Exercise 1: Did is the game over?"
     (let%map_open.Command () = return () in
      fun () ->
-       let evaluation = evaluate win_for_x in
+       let evaluation = evaluate ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces in
        print_s [%sexp (evaluation : Evaluation.t)])
 ;;
 
@@ -94,10 +103,10 @@ let exercise_two =
     ~summary:"Exercise 2: Where can I move?"
     (let%map_open.Command () = return () in
      fun () ->
-       let moves = available_moves win_for_x in
-       print_s [%sexp (moves : Possible_moves.t)];
-       let moves = available_moves non_win in
-       print_s [%sexp (moves : Possible_moves.t)])
+       let moves = available_moves ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces in
+       print_s [%sexp (moves : Position.t list)];
+       let moves = available_moves ~game_kind:non_win.game_kind ~pieces:non_win.pieces in
+       print_s [%sexp (moves : Position.t list)])
 ;;
 
 let exercise_three =
@@ -115,7 +124,7 @@ let exercise_three =
      in
      fun () ->
        let winning_moves = winning_moves non_win piece in
-       print_s [%sexp (winning_moves : Possible_moves.t)];
+       print_s [%sexp (winning_moves : Position.t list)];
        ())
 ;;
 
@@ -134,7 +143,7 @@ let exercise_four =
      in
      fun () ->
        let losing_moves = losing_moves non_win piece in
-       print_s [%sexp (losing_moves : Possible_moves.t)];
+       print_s [%sexp (losing_moves : Position.t list)];
        ())
 ;;
 
@@ -160,52 +169,55 @@ let%expect_test "print_non_win" =
 
 (* When you've implemented the [evaluate] function, uncomment the next two tests! *)
 (* let%expect_test "evalulate_win_for_x" =
- *   print_endline (win_for_x |> evaluate |> Evaluation.to_string);
- *   [%expect {| (Win X) |}]
- * ;;
- *
- * let%expect_test "evalulate_non_win" =
- *   print_endline (non_win |> evaluate |> Evaluation.to_string);
- *   [%expect {| Game_continues |}]
- * ;; *)
+   print_endline (evaluate ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces |> Evaluation.to_string);
+   [%expect {| (Win (X)) |}]
+ ;;
+
+ let%expect_test "evalulate_non_win" =
+   print_endline (evaluate ~game_kind:non_win.game_kind ~pieces:non_win.pieces |> Evaluation.to_string);
+   [%expect {| Game_continues |}]
+ ;; 
+*)
 
 (* After you've implemented [available_moves], uncomment these tests! *)
-(* let%expect_test "yes available_moves" =
- *   let (moves : Possible_moves.t) =
- *     available_moves non_win |> Option.map ~f:(List.sort ~compare:Position.compare)
- *   in
- *   print_s [%sexp (moves : Possible_moves.t)];
- *   [%expect
- *     {|
- *     ((((row 0) (column 1)) ((row 0) (column 2)) ((row 1) (column 1))
- *       ((row 1) (column 2)) ((row 2) (column 1)))) |}]
- * ;;
- *
- * let%expect_test "no available_moves" =
- *   let (moves : Possible_moves.t) =
- *     available_moves win_for_x |> Option.map ~f:(List.sort ~compare:Position.compare)
- *   in
- *   print_s [%sexp (moves : Possible_moves.t)];
- *   [%expect {| () |}]
- * ;; *)
+(*
+ let%expect_test "yes available_moves" =
+   let (moves : Position.t list) =
+     available_moves ~game_kind:non_win.game_kind ~pieces:non_win.pieces |> List.sort ~compare:Position.compare
+   in
+   print_s [%sexp (moves : Position.t list)];
+   [%expect
+     {|
+     (((row 0) (column 1)) ((row 0) (column 2)) ((row 1) (column 1))
+       ((row 1) (column 2)) ((row 2) (column 1))) |}]
+ ;;
+
+ let%expect_test "no available_moves" =
+   let (moves : Position.t list) =
+     available_moves ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces |> List.sort ~compare:Position.compare
+   in
+   print_s [%sexp (moves : Position.t list)];
+   [%expect {| () |}]
+ ;; 
+ *)
 
 (* When you've implemented the [winning_moves] function, uncomment this test! *)
 (* let%expect_test "winning_move" =
  *   let positions = winning_moves non_win Piece.X in
- *   print_s [%sexp (positions : Possible_moves.t)];
+ *   print_s [%sexp (positions : Position.t list)];
  *   [%expect {| ((((row 1) (column 1)))) |}];
  *   let positions = winning_moves non_win Piece.O in
- *   print_s [%sexp (positions : Possible_moves.t)];
+ *   print_s [%sexp (positions : Position.t list)];
  *   [%expect {| () |}]
  * ;; *)
 
 (* When you've implemented the [losing_moves] function, uncomment this test! *)
 (* let%expect_test "print_losing" =
  *   let positions = losing_moves non_win Piece.X in
- *   print_s [%sexp (positions : Possible_moves.t)];
+ *   print_s [%sexp (positions : Position.t list)];
  *   [%expect {| () |}];
  *   let positions = losing_moves non_win Piece.O in
- *   print_s [%sexp (positions : Possible_moves.t)];
+ *   print_s [%sexp (positions : Position.t list)];
  *   [%expect
  *     {|
  *     ((((row 0) (column 1)) ((row 0) (column 2)) ((row 1) (column 2))
