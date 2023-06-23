@@ -7,6 +7,7 @@ let url_var =
   Bonsai_web_ui_url_var.Typed.make
     (module Page)
     Page.parser
+    ~encoding_behavior:Correct
     ~fallback:(fun _ _ -> Homepage)
 ;;
 
