@@ -212,13 +212,13 @@ contain the "game server" that you can use to spectate your games!
 You can run the game server by running the `./run-game-server.sh` script:
 
 ```
-tictactoe$ ./run-game-server.sh 
-Game server running on port 8080
+tictactoe$ ./run-game-server.sh -port 8181
+Game server running on port 8181
 ```
 
-You should then be able to navigate to: http://$YOUR_AWS_HOSTNAME:8080
+You should then be able to navigate to: http://$YOUR_AWS_HOSTNAME:8181
 
-> NOTE: You can find your AWS hostname/IP address by running `$ hostname -I`
+> NOTE: You can find your public AWS hostname with: `curl http://169.254.169.254/latest/meta-data/public-hostname`
 
 You should see a game server site like this:
 
@@ -389,11 +389,11 @@ FAVORITE_POKEMON='bulbasaur' # Pick your own favorite Pokémon!
 Optional: you can run your own private/local game server by running the following script:
 
 ```sh
-tictactoe$ ./run-game-server.sh 
-Game server running on port 8080
+tictactoe$ ./run-game-server.sh -port 8181
+Game server running on port 8181
 ```
 
-and your "hostname" would be the output of `hostname -I`.
+and your "hostname" would be the output of `curl http://169.254.169.254/latest/meta-data/public-hostname`.
 
 ##### Your strategy vs. your strategy.
 
