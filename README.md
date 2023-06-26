@@ -83,12 +83,14 @@ the "Answer board" below:
 Answer board:
 
 ```
- - | - | - 
+ O | - | O 
 ___|___|___
- - | - | - 
+ - | X | - 
 ___|___|___
- - | - | - 
+ X | X | O 
 ```
+
+O can win by playing (2,1)
 
 After you've answered look for a fellow fellow near you and discuss your
 answers!
