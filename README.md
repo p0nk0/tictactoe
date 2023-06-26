@@ -145,7 +145,7 @@ Bot-running command
 
 ```sh
 opam update
-opam upgrade
+opam upgrade -y # [-y] stands for "answer yes to all the prompts".
 opam install bonsai -y
 opam install cohttp_static_handler -y
 dune build
