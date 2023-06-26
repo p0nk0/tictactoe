@@ -140,7 +140,8 @@ Bot-running command
 ```
 
 > NOTE: If you are getting a problem like `Library "bonsai" not found.` or a
-> type error, this is fine and expected. 
+> type error, this is fine and expected. You can run the following commands
+> to fix the problem:
 
 ```sh
 opam update
@@ -151,7 +152,7 @@ dune build
 ```
 
 > "opam" (OCaml's package manager) can be a bit weird at times, so please raise
-> your hand if `dune build` does not work afterward.
+> your hand/reach out for a TA if `dune build` does not work afterward.
 
 ## Directory Layout
 
@@ -224,9 +225,10 @@ You should see a game server site like this:
 ![Game Server](./images/game-server.jpg)
 
 > NOTE: If you can't see the above site, do not worry! We have a **shared, centralized server**
-> hosted at here [todo](todo). Its hostname and port are: http://TODO_HOSTNAME:8181. We will
-> soon be opening the `8181` port on your AWS boxes so that you can view your
-> locally running web server.
+> hosted [here](http://ec2-3-215-240-47.compute-1.amazonaws.com:8181/). Its
+> hostname and port are: http://ec2-3-215-240-47.compute-1.amazonaws.com:8181/.
+> We will soon be opening the `8181` port on your AWS boxes so that you can
+> view your locally running web server.
 
 ## Exercises
 
@@ -238,17 +240,17 @@ Where the `me` parameter is the "piece" that the bot is playing as, and
 the type of game you're playing (i.e. 3x3 tic-tac-toe vs. 15x15 Omok)), and the 
 returned position is the place you've picked to put your position.
 
-Over the course of these exercises you will be gradually such a function.
+Over the course of these exercises you will be gradually building such a function.
 
 > META NOTE: Throughout these exercises there are notes and hints, but don't feel
 > like you shouldn't read them/spoil yourself due to the hints, it's the opposite!
 > You should feel encouraged to read all the hints/notes in a given exercise's
-> instructions before taking a stab at the problem.
+> instructions before taking a stab at the exercise.
 
 ### Exercise 1
 
-Your AI _needs_ to make a choice of "which free available spot" it should
-put its piece on. Let's find "all free available spots"! Implement
+Your AI _needs_ to make a decision of "which free available spot" it should
+pick. Let's find "all free available spots"! Implement
 `available_moves` in `student/exercises/src/tic_tac_toe_exercises_lib.ml`. 
 
 ```ocaml
@@ -457,11 +459,21 @@ The player that creates the game has the first turn.
 Reach out to another fellow here and play against their random bot. If no one
 is available feel free to move on to exercise 2.
 
+> At this point you are done with exercise 1. Congrats!
+> Before moving on to exercise 2, feel free to save your work,
+> and commit it and push it to github.
+
 ### Exercise 2
 
-One question you might ask is: What if the game is already over? 
-Has someone already won? Is there a tie? Is a piece ready to be
-placed/does the game continue?
+We now have a working random strategy. Let's improve it!
+
+The next strategies we'll implement are "If there is a move I can make __right
+now__ that wins, let's do it, otherwise do a random move". To do this we'll
+need to evaluate all "next possible moves", but first, let's do something
+simpler:
+
+One question you might ask is: Is already over? Has someone already won? Is
+there a tie? Is a piece ready to be placed/does the game continue?
 
 Your task for exercise 2 is implementing:
 
@@ -479,10 +491,14 @@ module Evaluation = struct
     | Game_continues
 end
 ```
+
 You can implement this function in `student/exercises/src/tic_tac_toe_exercises_lib.ml`
 
-Feel free to - _at first_ - ignore the [game_kind] parameter and assume that
-it'll only work for tic-tac-toe, and not omok.
+One way you could imagine implementing this function is by "scanning" the board
+for patterns of length 3 (for tic tac toe) or 5 (for omok), in rows/columns/or
+diagonals. For example, the animation below scans for all rows of length 5:
+
+![Scanning Animation](./images/scanning-animation.gif)
 
 Here are some [*Map*] functions that you might find useful:
 
@@ -503,6 +519,7 @@ val mem : ('k, _, 'cmp) t -> 'k -> bool
 > Something else weird syntax-wise is that the type `(Position.t, Piece.t,
 > Position.comparator_witness) Map.t` **is the same as**  `Piece.t Position.Map.t`.
 
+> NOTE 2: You might also find `List.exists` from the snake exercises useful.
 
 Additionally, there are some functions that might be helpful available 
 for operating on `Position.t`'s
@@ -534,8 +551,65 @@ end
 
 > NOTE: [Position] is defined in `common/protocol.mli`.
 
-### Exercise 2
+Also remember to uncomment the tests at the bottom of
+`tic_tac_toe_exercises_lib.ml` once you are done.
 
+### Exercise 3
 
-TODO(j): write instructions for exercises 3+4
+Using [evaluate] and [available_moves], let's implement `winning_moves` in
+`student/exercises/src/main.ml`.
+
+```ocaml
+(* A list the list of moves that win the game in one move. *)
+val winning_moves : me:Piece.t -> game_kind:Game_kind.t -> pieces:Piece.t Position.Map.t -> Position.t list
+```
+
+It will look at all available moves, and see if they would win the game in 1 move.
+
+You might find `Map.set` useful.
+
+When you're done, uncomment the expect tests and move on to exercise 3.2.
+
+#### Exercise 3.2
+
+Using [winning_moves], let's implement [pick_winning_move_if_possible_strategy] in
+`tictactoe_game_ai.ml`. If there is a winning move, it'll pick it. Otherwise, it'll
+just pick a random move. Let's also update `compute_next_move` to use
+`pick_winning_move_if_possible_strategy`.
+
+Run your bot using the commands from exercise 1.3. Play against it on the UI,
+does it pick a winning position if it sees one? Can it beat the `Easy` bot more
+often? 
+
+### Exercise 4
+
+Alright, now we have a better strategy, let's _improve_ it!
+
+The next strategy we'll implement is "if the bot sees that its opponent can
+win in the next move, it'll __block__ its opponent from winning".
+
+Your task for exercise 4 is to implement `losing_moves` within
+`tic_tac_toe_exercises_lib.ml`.
+
+> HINT: A "losing move" is a "winning move" for your opponent after all. You
+> might find `Piece.flip` useful!
+
+When you're done, uncomment the expect tests and move on to exercise 4.2.
+
+#### Exercise 4.2
+
+Like before, in `tictactoe_game_ai.ml`, implement the descriptively named
+[pick_winning_move_or_block_if_possible_strategy], and update
+[compute_next_move] to use it.
+
+Play against your bot! Can you win against it? How often can it beat the `Easy`
+bot?
+
+### Exercise 5
+
+We've never mentioned its name thus far, but we've been secretly been implementing
+a version of the algorithm "minimax".
+[Minimax](https://en.wikipedia.org/wiki/Minimax) is a hallmark of artificial
+intelligence. Early chess engines used it a bunch. 
+
 

@@ -16,6 +16,40 @@ let random_move_strategy ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.
   failwith "Implement me!"
 ;;
 
+(* Exercise 3.2. 
+
+   Implement a game AI that picks a random position, unless there is an
+   available winning move.
+
+   After you are done, update [compute_next_move] to use your [pick_winning_move_if_possible_strategy].
+ *)
+let pick_winning_move_if_possible_strategy ~(me: Piece.t) ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.Map.t) : Position.t = 
+  ignore me;
+  ignore game_kind;
+  ignore pieces;
+  failwith "Implement me!"
+;;
+
+(* disables unused warning. Feel free to delete once it's used. *)
+let _ = pick_winning_move_if_possible_strategy
+
+(* Exercise 4.2. 
+
+   Implement a game AI that picks a random position, unless there is an
+   available winning move.
+
+   After you are done, update [compute_next_move] to use your [pick_winning_move_if_possible_strategy].
+ *)
+let pick_winning_move_or_block_if_possible_strategy ~(me: Piece.t) ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.Map.t) : Position.t = 
+  ignore me;
+  ignore game_kind;
+  ignore pieces;
+  failwith "Implement me!"
+;;
+
+(* disables unused warning. Feel free to delete once it's used. *)
+let _ = pick_winning_move_or_block_if_possible_strategy
+
 (* [compute_next_move] is your Game AI's function.
 
    [game_ai.exe] will connect, communicate, and play with the game server, and
