@@ -381,7 +381,7 @@ Bot-running command
 ```sh
 GAME_SERVER_HOST='ec2-3-215-240-47.compute-1.amazonaws.com'
 GAME_SERVER_PORT=8181
-FAVORITE_POKEMON='bulbasaur'
+FAVORITE_POKEMON='bulbasaur' # Pick your own favorite Pokémon!
 ```
 
 Optional: you can run your own private/local game server by running the following script:
@@ -392,6 +392,8 @@ Game server running on port 8080
 ```
 
 and your "hostname" would be the output of `hostname -I`.
+
+##### Your strategy vs. your strategy.
 
 Let's play your strategy against itself!
 
@@ -405,19 +407,55 @@ You'll see your game being played inside of
 The game might be short-lived, but if you pick "Omok" instead of "Tic_tac_toe", your game
 will run for a while.
 
+##### You vs. your strategy
+
 You can play against your bot by running the `create-game-and-play` command:
 
 ```sh
 tictactoe$ _build/default/student/bin/game_ai.exe create-game-and-play -port $GAME_SERVER_PORT -game-kind Tic_tac_toe -host $GAME_SERVER_HOST -username $FAVORITE_POKEMON
 successfully created game with id: '11'
 Waiting for someone to join...
-Waiting for someone to join...
-Waiting for someone to join...
-Waiting for someone to join...
 ```
 
-You will then be able to 
+Your game will then show up as a "joinable game", and then you can click it to join it.
+Also feel free to change your "__I am:__ IP_ADDRESS" to something else. (Sadly there's no
+authentication/anything like that so pick a unique username like your favorite
+Pokémon/rodent.)
 
+##### Your strategy vs. a "Game Server" bot.
+
+You can play against the game server bot by specifying `-against-bot` to the
+`create-game-and-play` command:
+
+```sh
+# Easy
+tictactoe$ _build/default/student/bin/game_ai.exe create-game-and-play -port $GAME_SERVER_PORT -game-kind Tic_tac_toe -host $GAME_SERVER_HOST -username $FAVORITE_POKEMON -against-bot Easy
+successfully created game with id: '15'
+"successfully took turn!"
+"successfully took turn!"
+"successfully took turn!"
+"successfully took turn!"
+"successfully took turn!"
+("Game is over!" (winner ((Player bulbasaur))))
+
+# Hard
+tictactoe$ _build/default/student/bin/game_ai.exe create-game-and-play -port $GAME_SERVER_PORT -game-kind Tic_tac_toe -host $GAME_SERVER_HOST -username $FAVORITE_POKEMON -against-bot Hard
+successfully created game with id: '13'
+"successfully took turn!"
+"successfully took turn!"
+"successfully took turn!"
+("Game is over!" (winner ((Server_bot Hard))))
+```
+
+##### Your strategy vs. another fellows strategy
+
+You can play against another fellow's strategy by first running
+`create-game-and-play`, and then the other fellow's strategy can
+join your game with the `join-game-and-play` with your game's id.
+The player that creates the game has the first turn.
+
+Reach out to another fellow here and play against their random bot. If no one
+is available feel free to move on to exercise 2.
 
 ### Exercise 2
 
@@ -456,7 +494,7 @@ val find : ('k, 'v, 'cmp) Map.t -> 'k -> 'v option
 val mem : ('k, _, 'cmp) t -> 'k -> bool
 ```
 
-> NOTE: The type `('k, 'v, 'cmp) Map.t` means a map from with keys of type
+> NOTE: The type `('k, 'v, 'cmp) Map.t` means a map with keys of type
 > `'k` and values of type `'v`. For example, `(Position.t, Piece.t,
 > Position.comparator_witness) Map.t` is a map from `Position.t` to `Piece.t`.
 > The `'cmp` parameter is magical and you can mostly ignore it. If you're

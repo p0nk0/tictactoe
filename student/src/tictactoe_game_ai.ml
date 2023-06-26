@@ -24,25 +24,10 @@ let random_move_strategy ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.
    [compute_next_move] is only called whenever it is your turn, the game isn't yet
    over, so feel free to raise in cases where there are no available spots to pick.
  *)
-let _compute_next_move ~(me : Piece.t) ~(game_state : Game_state.t) : Position.t =
+let compute_next_move ~(me : Piece.t) ~(game_state : Game_state.t) : Position.t =
   ignore random_move_strategy;
   ignore me;
   ignore game_state;
   { Position.row = 0; column = 0 }
 ;;
-
-
-let compute_next_move ~me:_ ~game_state = 
-  let all_positions =
-    let board_length = Game_kind.board_length game_state.Game_state.game_kind in
-    let%bind.List row = List.init board_length ~f:Fn.id in
-    let%map.List column = List.init board_length ~f:Fn.id in
-    { Position.row; column }
-  in
-  let free_positions =
-    List.filter all_positions ~f:(fun position ->
-      not (Map.mem game_state.pieces position))
-  in
-  List.random_element free_positions
-  |> Option.value_exn ~message:"Whoops, no more available spots"
 
