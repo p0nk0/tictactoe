@@ -666,17 +666,16 @@ Read the pseudocode on minimax from [wikipedia](https://en.wikipedia.org/wiki/Mi
 
 **What is a "terminal node"?**
 
-In the context of tic tac toe/omok, a terminal node is the game ending by someone winning/losing
+A terminal node is the game ending by someone winning/losing
 or by the game tie'ing due to all of the slots being filled.
 
 **What is the "heuristic value of node"?**
 
-In the context of this exercise, it would be the `score` function you just implemented.
+It would be the `score` function you just implemented.
 
 **What is the "child of node"**?
 
-In the context of this exercise, it would be the `available_moves` function you
-implemented in exercise 1.
+The `available_moves` function you implemented in exercise 1.
 
 If you have any questions please ask a TA!
 
