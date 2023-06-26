@@ -6,10 +6,10 @@ open! Protocol
 let () =
   Command.group
     ~summary:"Tic Tac Toe exercises"
-    [ "exercise-one", Main.exercise_one
-    ; "exercise-two", Main.exercise_two
-    ; "exercise-three", Main.exercise_three
-    ; "exercise-four", Main.exercise_four
+    [ "exercise-one", Tic_tac_toe_exercises_lib.exercise_one
+    ; "exercise-two", Tic_tac_toe_exercises_lib.exercise_two
+    ; "exercise-three", Tic_tac_toe_exercises_lib.exercise_three
+    ; "exercise-four", Tic_tac_toe_exercises_lib.exercise_four
     ]
   |> Command_unix.run
 ;;

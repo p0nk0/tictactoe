@@ -85,7 +85,7 @@ let create_game_and_play t ~me ~against ~game_kind ~(game_ai : game_ai) ~refresh
       t
       ~query:{ username = me; txt = { game_kind; against_server_bot = against } }
   in
-  print_endline "successfully created game";
+  print_endline [%string "successfully created game with id: '%{game_id#Game_id}'"];
   game_loop t ~me ~game_id ~game_ai ~refresh_rate
 ;;
 

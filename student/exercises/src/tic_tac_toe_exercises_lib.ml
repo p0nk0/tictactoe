@@ -55,7 +55,22 @@ let non_win =
 ;;
 
 
+
+
 (* Exercise 1.
+
+  For instructions on implemeting this refer to the README.
+
+  After you are done with this implementation, you can uncomment out
+  "evaluate" test cases found below in this file.
+ *)
+let available_moves ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.Map.t) : Position.t list =
+  ignore game_kind;
+  ignore pieces;
+  failwith "Implement me!"
+;;
+
+(* Exercise 2.
 
   For instructions on implemeting this refer to the README.
 
@@ -68,12 +83,6 @@ let evaluate ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.Map.t) : Eva
   failwith "Implement me!"
 ;;
 
-(* Exercise 2. *)
-let available_moves ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.Map.t) : Position.t list =
-  ignore game_kind;
-  ignore pieces;
-  failwith "Implement me!"
-;;
 
 (* Exercise 3. *)
 let winning_moves (game : Game_state.t) piece : Position.t list =
@@ -91,22 +100,22 @@ let losing_moves (game : Game_state.t) piece : Position.t list =
 
 let exercise_one =
   Command.basic
-    ~summary:"Exercise 1: Did is the game over?"
-    (let%map_open.Command () = return () in
-     fun () ->
-       let evaluation = evaluate ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces in
-       print_s [%sexp (evaluation : Evaluation.t)])
-;;
-
-let exercise_two =
-  Command.basic
-    ~summary:"Exercise 2: Where can I move?"
+    ~summary:"Exercise 1: Where can I move?"
     (let%map_open.Command () = return () in
      fun () ->
        let moves = available_moves ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces in
        print_s [%sexp (moves : Position.t list)];
        let moves = available_moves ~game_kind:non_win.game_kind ~pieces:non_win.pieces in
        print_s [%sexp (moves : Position.t list)])
+;;
+
+let exercise_two =
+  Command.basic
+    ~summary:"Exercise 2: Did is the game over?"
+    (let%map_open.Command () = return () in
+     fun () ->
+       let evaluation = evaluate ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces in
+       print_s [%sexp (evaluation : Evaluation.t)])
 ;;
 
 let exercise_three =
@@ -167,17 +176,6 @@ let%expect_test "print_non_win" =
     O X |}]
 ;;
 
-(* When you've implemented the [evaluate] function, uncomment the next two tests! *)
-(* let%expect_test "evalulate_win_for_x" =
-   print_endline (evaluate ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces |> Evaluation.to_string);
-   [%expect {| (Win (X)) |}]
- ;;
-
- let%expect_test "evalulate_non_win" =
-   print_endline (evaluate ~game_kind:non_win.game_kind ~pieces:non_win.pieces |> Evaluation.to_string);
-   [%expect {| Game_continues |}]
- ;; 
-*)
 
 (* After you've implemented [available_moves], uncomment these tests! *)
 (*
@@ -200,6 +198,19 @@ let%expect_test "print_non_win" =
    [%expect {| () |}]
  ;; 
  *)
+
+(* When you've implemented the [evaluate] function, uncomment the next two tests! *)
+(* let%expect_test "evalulate_win_for_x" =
+   print_endline (evaluate ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces |> Evaluation.to_string);
+   [%expect {| (Win (X)) |}]
+ ;;
+
+ let%expect_test "evalulate_non_win" =
+   print_endline (evaluate ~game_kind:non_win.game_kind ~pieces:non_win.pieces |> Evaluation.to_string);
+   [%expect {| Game_continues |}]
+ ;; 
+*)
+
 
 (* When you've implemented the [winning_moves] function, uncomment this test! *)
 (* let%expect_test "winning_move" =
