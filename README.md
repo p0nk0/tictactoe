@@ -568,7 +568,8 @@ It will look at all available moves, and see if they would win the game in 1 mov
 
 You might find `Map.set` useful.
 
-When you're done, uncomment the expect tests and move on to exercise 3.2.
+When you're done, uncomment the expect tests and move on to exercise 3.2. Also,
+remember to commit+push.
 
 #### Exercise 3.2
 
@@ -594,7 +595,8 @@ Your task for exercise 4 is to implement `losing_moves` within
 > HINT: A "losing move" is a "winning move" for your opponent after all. You
 > might find `Piece.flip` useful!
 
-When you're done, uncomment the expect tests and move on to exercise 4.2.
+When you're done, uncomment the expect tests and move on to exercise 4.2. Also,
+remember to commit+push!
 
 #### Exercise 4.2
 
@@ -608,8 +610,113 @@ bot?
 ### Exercise 5
 
 We've never mentioned its name thus far, but we've been secretly been implementing
-a version of the algorithm "minimax".
-[Minimax](https://en.wikipedia.org/wiki/Minimax) is a hallmark of artificial
-intelligence. Early chess engines used it a bunch. 
+a version of the algorithm ["Minimax"](https://en.wikipedia.org/wiki/Minimax). It
+was one of the earlier algorithms to beat humans at complex games like chess,
+and it's also the algorithm we'll be implementing next.
+
+Thus far we've implemented an algorithm that can look __1__ move into the future
+and if it can win/not lose into the future, it can make the best decision. One
+immediate idea is:
+
+1. What if we look **further** into the future?
+
+Take a moment to intuitively think, for yourself on a piece of paper/on a text
+file, if you could look __2__ moves into the future on tic tac toe/how would
+you pick your next move? What about __3__? Discuss with another fellow or if no
+one is available talk to a TA!
+
+
+Minimax has a couple of parts:
+
+* __score__: What is the current "score" of the game's position? This is a bit
+  silly on a game like tic-tac-toe/omok, but you could think of "winning" as
+  +infinity score and losing as -infinity score. You could also come up with
+  heuristics like, if I see "2" pieces together, then I add 4, if my opponent has
+  4 pieces together, then I subtract 50. Or even if I have n pieces together, I
+  add `n*n` to my score.
+* __maximizing__ player: You win when your score reaches +infinity, so you want
+ to __maximize__ the score.
+* __minimizing__ player: Your opponent wins when the score reaches -inifinity, so
+  they will always want to __minimize__ the score.
+  
+Minimax assumes that both players will play optimally, so minimax assumes that
+the __maximizing__ player will always pick the move that results in the maximum
+score, and that the __minimizing__ player picks the smaller score.
+
+Minimax operates under a "max-depth" it will travese to it will take as a parameter
+"how many moves into the future" it should try to evaluate. It will then build
+a tree like the ones shown in this [wikipedia page](https://en.wikipedia.org/wiki/Minimax)
+and run the __score__ function on "terminal" nodes that are nodes where
+either the game ends (score is infinity) or where the max depth has been reached.
+
+![Minimax Decision Tree](./images/minimax-tree-wikipedia.png)
+Here are more resources on minimax. Also feel free to ask TA's if you have any questions:
+- [Really cool video by Sebastian Lague](https://youtu.be/l-hh51ncgDI)
+
+#### Exercise 5.1
+
+You can use your already implemented `evaluate` function to implement a `score`
+function. You can implement `score` in `tictactoe_game_ai.ml`. A very basic 
+version of score can be -infinity for loss, +infinity for win, [0.0] for the
+game continuing.
+
+#### Exercise 5.2
+
+Read the pseudocode on minimax from [wikipedia](https://en.wikipedia.org/wiki/Minimax#Pseudocode).
+
+**What is a "terminal node"?**
+
+In the context of tic tac toe/omok, a terminal node is the game ending by someone winning/losing
+or by the game tie'ing due to all of the slots being filled.
+
+**What is the "heuristic value of node"?**
+
+In the context of this exercise, it would be the `score` function you just implemented.
+
+**What is the "child of node"**?
+
+In the context of this exercise, it would be the `available_moves` function you
+implemented in exercise 1.
+
+If you have any questions please ask a TA!
+
+#### Exercise 5.3
+
+Implement minimax by following the pseudocode from wikipedia. Some functions
+you might find handy are:
+
+```ocaml
+val min_elt : 'a list -> compare:('a -> 'a -> int) -> 'a option
+val max_elt : 'a list -> compare:('a -> 'a -> int) -> 'a option
+
+(** fold t ~init ~f returns f (... f (f (f init e1) e2) e3 ...) en, where e1..en are the elements of t *)
+val fold : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
+```
+
+> HINT: OCaml required the `rec` keyword for recursive functions.
+
+You can write this function, with the parameters of your choosing within
+`tictactoe_game_ai.ml`.
+
+Once you are done, you can update `compute_next_move` to make your AI executable
+use minimax and play with your AI! How much better is it? How far deep can you 
+set the parameter on tic tac toe? What about Omok? How slow/fast is it? Can it beat
+the medium server bot? What about the hard server bot? Can you win against it?
+
+
+### Extensions
+
+This is a list of possible extensions you could implement. You are also free to
+come up extensions of your own/ideas of your own to beat the "Hard" server
+bot/be faster than the server bot.
+
+- Change [available_positions] to only pick empty positions that are next to occupied
+  pieces to lower the search space.
+- Make your score function "heuristic based" by scoring 2/3/4 consecutive pieces
+  an "n*n" score.
+- Implement a minimax optimization called [alpha beta
+  pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning).
+- Make evaluation super fast by using [bit
+  masks](https://medium.com/@LukeASalamone/creating-an-ai-for-gomoku-28a4c84c7a52).
 
 
