@@ -57,6 +57,8 @@ let score ~(me : Piece.t) ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position
   0.0
 ;;
 
+let _ = score
+
 
 (* [compute_next_move] is your Game AI's function.
 
