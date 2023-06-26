@@ -55,8 +55,21 @@ let non_win =
   |> place_piece ~piece:Piece.O ~position:{ Position.row = 2; column = 0 }
 ;;
 
+let diag_win_for_o =
+  empty_game
+  |> place_piece ~piece:Piece.X ~position:{ Position.row = 0; column = 0 }
+  |> place_piece ~piece:Piece.O ~position:{ Position.row = 1; column = 0 }
+  |> place_piece ~piece:Piece.X ~position:{ Position.row = 2; column = 2 }
+  |> place_piece ~piece:Piece.O ~position:{ Position.row = 2; column = 0 }
+  |> place_piece ~piece:Piece.X ~position:{ Position.row = 2; column = 1 }
+  |> place_piece ~piece:Piece.O ~position:{ Position.row = 1; column = 1 }
+  |> place_piece ~piece:Piece.O ~position:{ Position.row = 0; column = 2 }
+  |> place_piece ~piece:Piece.O ~position:{ Position.row = 0; column = 1 }
+  |> place_piece ~piece:Piece.X ~position:{ Position.row = 1; column = 2 }
+;;
+
 let get_empty_board (game_kind : Game_kind.t) =
-  let size = match game_kind with Tic_tac_toe -> 3 | Omok -> 15 in
+  let size = Game_kind.board_length game_kind in
   List.concat
     (List.init size ~f:(fun i ->
        List.init size ~f:(fun j -> { Position.row = i; Position.column = j })))
@@ -73,8 +86,6 @@ let available_moves
   ~(pieces : Piece.t Position.Map.t)
   : Position.t list
   =
-  (* List.iter (get_empty_board ()) ~f:(fun (x, y) -> printf "%d %d \n" x
-     y); *)
   Set.to_list
     (Set.diff
        (Set.of_list (module Position) (get_empty_board game_kind))
@@ -87,12 +98,77 @@ let available_moves
 
    After you are done with this implementation, you can uncomment out
    "evaluate" test cases found below in this file. *)
+
+let scan i (start : Position.t) direction pieces player =
+  let empty = List.init i ~f:(fun i -> i) in
+  let f =
+    match direction with
+    | "row" ->
+      fun i ->
+        { Position.row = start.row + i; Position.column = start.column }
+    | "col" ->
+      fun i ->
+        { Position.row = start.row; Position.column = start.column + i }
+    | "major" ->
+      fun i ->
+        { Position.row = start.row + i; Position.column = start.column + i }
+    | "minor" ->
+      fun i ->
+        { Position.row = start.row - i; Position.column = start.column - i }
+    | _ -> failwith "invalid direction"
+  in
+  let g x y =
+    match y with None -> false | Some y -> x && Piece.equal y player
+  in
+  List.fold
+    (List.map (List.map empty ~f) ~f:(Map.find pieces))
+    ~init:false
+    ~f:g
+;;
+
+let check_row_col (game_kind : Game_kind.t) pieces player dir =
+  let win = Game_kind.win_length game_kind in
+  let f i =
+    match dir with
+    | "row" -> { Position.row = 0; Position.column = i }
+    | "col" -> { Position.row = i; Position.column = 0 }
+    | _ -> failwith "invalid direction"
+  in
+  match game_kind with
+  | Tic_tac_toe ->
+    List.fold
+      (List.map (List.init win ~f) ~f:(fun pos ->
+         scan win pos dir pieces player))
+      ~init:false
+      ~f:( || )
+  | Omok -> failwith "Omok eval not implemented"
+;;
+
+let check_all_dirs game_kind pieces player =
+  check_row_col game_kind pieces player "row"
+  || check_row_col game_kind pieces player "col"
+;;
+
+let board_full game_kind pieces =
+  List.is_empty (available_moves ~game_kind ~pieces)
+;;
+
+(* this works for tic tac toe rows and columns, I need to add diagonals and
+   Omok *)
 let evaluate ~(game_kind : Game_kind.t) ~(pieces : Piece.t Position.Map.t)
   : Evaluation.t
   =
-  ignore pieces;
-  ignore game_kind;
-  failwith "Implement me!"
+  let eval_player player = check_all_dirs game_kind pieces player in
+  let x = eval_player Piece.X in
+  let o = eval_player Piece.O in
+  match x, o with
+  | true, true -> Illegal_state
+  | true, false -> Game_over { winner = Some Piece.X }
+  | false, true -> Game_over { winner = Some Piece.O }
+  | _ ->
+    if board_full game_kind pieces
+    then Game_over { winner = None }
+    else Game_continues
 ;;
 
 (* Exercise 3. *)
@@ -241,13 +317,28 @@ let%expect_test "no available_moves" =
 
 (* When you've implemented the [evaluate] function, uncomment the next two
    tests! *)
-(* let%expect_test "evalulate_win_for_x" = print_endline (evaluate
-   ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces |>
-   Evaluation.to_string); [%expect {| (Win (X)) |}] ;;
+let%expect_test "evalulate_win_for_x" =
+  print_endline
+    (evaluate ~game_kind:win_for_x.game_kind ~pieces:win_for_x.pieces
+     |> Evaluation.to_string);
+  [%expect {| (Win (O)) |}]
+;;
 
-   let%expect_test "evalulate_non_win" = print_endline (evaluate
-   ~game_kind:non_win.game_kind ~pieces:non_win.pieces |>
-   Evaluation.to_string); [%expect {| Game_continues |}] ;; *)
+let%expect_test "evalulate_diag_win_for_o" =
+  print_endline
+    (evaluate
+       ~game_kind:diag_win_for_o.game_kind
+       ~pieces:diag_win_for_o.pieces
+     |> Evaluation.to_string);
+  [%expect {| (Win (X)) |}]
+;;
+
+let%expect_test "evalulate_non_win" =
+  print_endline
+    (evaluate ~game_kind:non_win.game_kind ~pieces:non_win.pieces
+     |> Evaluation.to_string);
+  [%expect {| Game_continues |}]
+;;
 
 (* When you've implemented the [winning_moves] function, uncomment this
    test! *)
