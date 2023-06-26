@@ -710,12 +710,13 @@ come up extensions of your own/ideas of your own to beat the "Hard" server
 bot/be faster than the server bot.
 
 - Change [available_positions] to only pick empty positions that are next to occupied
-  pieces to lower the search space.
+  pieces to lower the search space. Does the depth you can explore increase?
 - Make your score function "heuristic based" by scoring 2/3/4 consecutive pieces
   an "n*n" score.
 - Implement a minimax optimization called [alpha beta
-  pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning).
+  pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning). Does the depth
+  that you can explore increase?
 - Make evaluation super fast by using [bit
   masks](https://medium.com/@LukeASalamone/creating-an-ai-for-gomoku-28a4c84c7a52).
-
+- Pick different heuristics for your [score] function.
 
