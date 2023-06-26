@@ -23,7 +23,8 @@ let create_column ~strong_word ~content =
     ~attrs:[ Style.homepage_column ]
     [ Vdom.Node.div
         [ Vdom.Node.span
-            [ Vdom.Node.strong [ View.text ([%string "%{strong_word}"] ^ " ") ]
+            [ Vdom.Node.strong
+                [ View.text ([%string "%{strong_word}"] ^ " ") ]
             ; View.text "game"
             ]
         ]
@@ -32,7 +33,9 @@ let create_column ~strong_word ~content =
 ;;
 
 let game_kind_form =
-  let%sub selected_game, set_selected_game = Bonsai.state Game_kind.Tic_tac_toe in
+  let%sub selected_game, set_selected_game =
+    Bonsai.state Game_kind.Tic_tac_toe
+  in
   let%sub tic_tac_toe_button, omok_button =
     let%sub theme = View.Theme.current in
     let%arr selected_game = selected_game
@@ -54,9 +57,7 @@ let game_kind_form =
         (Game_kind.sexp_of_t game
          |> Sexp.to_string
          |> String.lowercase
-         |> String.map ~f:(function
-           | '_' -> ' '
-           | x -> x))
+         |> String.map ~f:(function '_' -> ' ' | x -> x))
     in
     create_button ~game:Tic_tac_toe, create_button ~game:Omok
   in
@@ -101,7 +102,9 @@ let against_form =
         (match against with
          | None -> "human"
          | Some difficulty ->
-           Difficulty.sexp_of_t difficulty |> Sexp.to_string |> String.lowercase)
+           Difficulty.sexp_of_t difficulty
+           |> Sexp.to_string
+           |> String.lowercase)
     in
     [ None; Some Difficulty.Easy; Some Medium; Some Hard ]
     |> List.map ~f:(fun against -> create_button ~against)
@@ -115,7 +118,8 @@ let against_form =
       theme
       ~title_kind:Discreet
       ~title:[ Vdom.Node.text "Game kind" ]
-      [ Vdom.Node.div ~attrs:[ Kado.Unstable.Buttons.vertical_group ] buttons ] )
+      [ Vdom.Node.div ~attrs:[ Kado.Unstable.Buttons.vertical_group ] buttons
+      ] )
 ;;
 
 let create_game_button ~set_url ~game_kind ~against =
@@ -137,11 +141,14 @@ let create_game_button ~set_url ~game_kind ~against =
       ~on_click:
         (let%bind.Effect response =
            send_create_game_rpc
-             { With_username.username; txt = { game_kind; against_server_bot = against } }
+             { With_username.username
+             ; txt = { game_kind; against_server_bot = against }
+             }
          in
          match response with
          | Error error ->
-           Effect.print_s [%message "Error while creating game" (error : Error.t)]
+           Effect.print_s
+             [%message "Error while creating game" (error : Error.t)]
          | Ok game_id ->
            (match against with
             | None -> Effect.Ignore
@@ -152,21 +159,28 @@ let create_game_button ~set_url ~game_kind ~against =
 let create_game_section ~set_url =
   let%sub game_kind, game_kind_vdom = game_kind_form in
   let%sub against, against_vdom = against_form in
-  let%sub create_game_button = create_game_button ~game_kind ~against ~set_url in
+  let%sub create_game_button =
+    create_game_button ~game_kind ~against ~set_url
+  in
   let%arr game_kind_vdom = game_kind_vdom
   and against_vdom = against_vdom
   and create_game_button = create_game_button in
   View.vbox
     ~attrs:[ Style.create_game_section ]
-    [ View.hbox ~gap:(`Rem 0.5) [ game_kind_vdom; against_vdom ]; create_game_button ]
+    [ View.hbox ~gap:(`Rem 0.5) [ game_kind_vdom; against_vdom ]
+    ; create_game_button
+    ]
 ;;
 
-let render_player player = View.text (Rendering_utils.player_to_string player)
+let render_player player =
+  View.text (Rendering_utils.player_to_string player)
+;;
 
 let joinable_games_columns
-  : join_game:(Game_id.t -> unit Effect.t) option -> Joinable_game.t View.Table.Col.t list
+  :  join_game:(Game_id.t -> unit Effect.t) option
+  -> Joinable_game.t View.Table.Col.t list
   =
-  fun ~join_game ->
+ fun ~join_game ->
   [ View.Table.Col.make
       "id"
       ~get:(fun joinable_game -> joinable_game.Joinable_game.game_id)
@@ -178,7 +192,8 @@ let joinable_games_columns
   ; View.Table.Col.make
       "game kind"
       ~get:(fun joinable_game -> joinable_game.Joinable_game.game_kind)
-      ~render:(fun theme game_kind -> Rendering_utils.render_game_kind theme game_kind)
+      ~render:(fun theme game_kind ->
+        Rendering_utils.render_game_kind theme game_kind)
   ; View.Table.Col.make
       "join"
       ~get:(fun joinable_game -> joinable_game.Joinable_game.game_id)
@@ -189,7 +204,9 @@ let joinable_games_columns
           let constants = View.constants theme in
           Feather_icon.svg
             ~extra_attrs:
-              [ Accessibility.button_role; Vdom.Attr.on_click (fun _ -> join_game id) ]
+              [ Accessibility.button_role
+              ; Vdom.Attr.on_click (fun _ -> join_game id)
+              ]
             ~size:(`Rem 1.0)
             ~fill:constants.primary.foreground
             Play)
@@ -207,23 +224,29 @@ let joinable_games ~set_url =
       | Or_waiting.Waiting -> Bonsai.const None
       | Resolved me ->
         let%sub join_game =
-          Rpc_effect.Rpc.dispatcher ~where_to_connect:Self Join_existing_game.rpc
+          Rpc_effect.Rpc.dispatcher
+            ~where_to_connect:Self
+            Join_existing_game.rpc
         in
         let%arr me = me
         and join_game = join_game in
         Some
           (fun game_id ->
-             match%bind.Effect join_game { username = me; txt = game_id } with
-             | Error error ->
-               Effect.print_s
-                 [%message "error while trying to join game!" (error : Error.t)]
-             (* TODO: Maybe show nice errors in a toast/something else. *)
-             | Ok ((Game_does_not_exist | Game_already_full | Game_already_ended) as error)
-               ->
-               Effect.print_s
-                 [%message
-                   "App-level error occurred." (error : Join_existing_game.Response.t)]
-             | Ok (Ok | You've_already_joined_this_game) -> set_url (Page.Game game_id))
+            match%bind.Effect join_game { username = me; txt = game_id } with
+            | Error error ->
+              Effect.print_s
+                [%message
+                  "error while trying to join game!" (error : Error.t)]
+            (* TODO: Maybe show nice errors in a toast/something else. *)
+            | Ok
+                (( Game_does_not_exist | Game_already_full
+                 | Game_already_ended ) as error) ->
+              Effect.print_s
+                [%message
+                  "App-level error occurred."
+                    (error : Join_existing_game.Response.t)]
+            | Ok (Ok | You've_already_joined_this_game) ->
+              set_url (Page.Game game_id))
     in
     let%sub theme = View.Theme.current in
     let%arr joinable_games = joinable_games
@@ -235,7 +258,8 @@ let joinable_games ~set_url =
         match join_game with
         | None -> []
         | Some join_game ->
-          [ Vdom.Attr.on_click (fun _ -> join_game joinable_game.Joinable_game.game_id)
+          [ Vdom.Attr.on_click (fun _ ->
+              join_game joinable_game.Joinable_game.game_id)
           ; Style.clickable_row
           ])
       theme
@@ -245,13 +269,14 @@ let joinable_games ~set_url =
 
 let watchable_games_column
   :  am_i_playing:(Game_state.t -> bool) -> set_url:(Page.t -> unit Effect.t)
-    -> Game_state.t View.Table.Col.t list
+  -> Game_state.t View.Table.Col.t list
   =
-  fun ~am_i_playing ~set_url ->
+ fun ~am_i_playing ~set_url ->
   [ View.Table.Col.make
       "id"
       ~get:(fun game_state -> game_state.Game_state.game_id)
-      ~render:(fun _theme game_id -> View.textf "%d" (Game_id.to_int game_id))
+      ~render:(fun _theme game_id ->
+        View.textf "%d" (Game_id.to_int game_id))
   ; View.Table.Col.make
       "watch"
       ~get:(fun game_state -> game_state.Game_state.game_id)
@@ -317,7 +342,8 @@ let watchable_games ~set_url =
     View.Table.render
       ~table_attrs:[ Style.table_full_width ]
       ~row_attrs:(fun game_state ->
-        [ Vdom.Attr.on_click (fun _ -> set_url (Page.Game game_state.Game_state.game_id))
+        [ Vdom.Attr.on_click (fun _ ->
+            set_url (Page.Game game_state.Game_state.game_id))
         ; Style.clickable_row
         ; (match game_state.game_status with
            | Game_over _ -> Style.finished_game
@@ -327,25 +353,25 @@ let watchable_games ~set_url =
       (watchable_games_column ~am_i_playing ~set_url)
       (Map.data games_with_two_players
        |> List.sort ~compare:(fun a b ->
-         Comparable.lexicographic
-           [ (fun a b ->
-               Comparable.lift
-                 Int.ascending
-                 ~f:(fun game_state ->
-                   match game_state.Game_state.game_status with
-                   | Game_status.Game_over _ -> 1
-                   | _ -> 0)
-                 a
-                 b)
-           ; (fun a b ->
-                Comparable.lift
-                  (Comparable.reverse Game_id.compare)
-                  ~f:(fun game_state -> game_state.Game_state.game_id)
-                  a
-                  b)
-           ]
-           a
-           b))
+            Comparable.lexicographic
+              [ (fun a b ->
+                  Comparable.lift
+                    Int.ascending
+                    ~f:(fun game_state ->
+                      match game_state.Game_state.game_status with
+                      | Game_status.Game_over _ -> 1
+                      | _ -> 0)
+                    a
+                    b)
+              ; (fun a b ->
+                  Comparable.lift
+                    (Comparable.reverse Game_id.compare)
+                    ~f:(fun game_state -> game_state.Game_state.game_id)
+                    a
+                    b)
+              ]
+              a
+              b))
 ;;
 
 let component ~set_url ~navbar =
@@ -359,8 +385,13 @@ let component ~set_url ~navbar =
   and watchable_games = return watchable_games in
   Vdom.Node.div
     ~attrs:[ Style.grid_container ]
-    [ Vdom.Node.div ~key:"navbar" ~attrs:[ Style.grid_item_navbar ] [ navbar ]
-    ; Vdom.Node.div ~attrs:[ Style.grid_item_entire_content ] [ banner ~set_url theme ]
+    [ Vdom.Node.div
+        ~key:"navbar"
+        ~attrs:[ Style.grid_item_navbar ]
+        [ navbar ]
+    ; Vdom.Node.div
+        ~attrs:[ Style.grid_item_entire_content ]
+        [ banner ~set_url theme ]
     ; Vdom.Node.div
         ~attrs:[ Style.vsplit3; Style.grid_item_entire_content_level_2 ]
         [ create_column ~strong_word:"Create" ~content:create_game_section

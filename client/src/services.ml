@@ -14,11 +14,18 @@ let me_var =
 ;;
 
 let random_image_var =
-  Bonsai.Dynamic_scope.create ~name:"jsip-random-image" ~fallback:Images.Capybara ()
+  Bonsai.Dynamic_scope.create
+    ~name:"jsip-random-image"
+    ~fallback:Images.Capybara
+    ()
 ;;
 
 let random_image = Bonsai.Dynamic_scope.lookup random_image_var
-let set_me me = Effect.of_sync_fun (Persistent_var.set me_var) (Or_waiting.Resolved me)
+
+let set_me me =
+  Effect.of_sync_fun (Persistent_var.set me_var) (Or_waiting.Resolved me)
+;;
+
 let me = Bonsai.read (Persistent_var.value me_var)
 
 let me_once =
@@ -95,30 +102,31 @@ let take_turn =
   match%sub me with
   | Or_waiting.Waiting -> Bonsai.const Or_waiting.Waiting
   | Or_waiting.Resolved me ->
-    let%sub send_rpc = Rpc_effect.Rpc.dispatcher ~where_to_connect:Self Take_turn.rpc in
+    let%sub send_rpc =
+      Rpc_effect.Rpc.dispatcher ~where_to_connect:Self Take_turn.rpc
+    in
     let%arr send_rpc = send_rpc
     and me = me in
     Or_waiting.Resolved
       (fun ~game_id position ->
-         let%bind.Effect response =
-           send_rpc { username = me; txt = { game_id; position } }
-         in
-         match response with
-         | Ok Ok -> Effect.Ignore
-         | Ok
-             (( Game_does_not_exist
-              | Not_your_turn
-              | Game_is_over
-              | Position_out_of_bounds
-              | Position_already_occupied
-              | You_are_not_a_player_in_this_game ) as error) ->
-           Effect.print_s
-             [%message
-               "There was an error while taking a turn!" (error : Take_turn.Response.t)]
-         | Error error ->
-           Effect.print_s
-             [%message
-               "There was a connection error while taking a turn!" (error : Error.t)])
+        let%bind.Effect response =
+          send_rpc { username = me; txt = { game_id; position } }
+        in
+        match response with
+        | Ok Ok -> Effect.Ignore
+        | Ok
+            (( Game_does_not_exist | Not_your_turn | Game_is_over
+             | Position_out_of_bounds | Position_already_occupied
+             | You_are_not_a_player_in_this_game ) as error) ->
+          Effect.print_s
+            [%message
+              "There was an error while taking a turn!"
+                (error : Take_turn.Response.t)]
+        | Error error ->
+          Effect.print_s
+            [%message
+              "There was a connection error while taking a turn!"
+                (error : Error.t)])
 ;;
 
 let is_thinking ~game_id =

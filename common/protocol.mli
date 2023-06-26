@@ -1,8 +1,9 @@
 open! Core
 open! Async_rpc_kernel
 
-(** The protocol for connections between "players" and the Tic Tac Toe game server.
-    where the "players" can "play" via either a web ui, or through their Game AI bots. *)
+(** The protocol for connections between "players" and the Tic Tac Toe game
+    server. where the "players" can "play" via either a web ui, or through
+    their Game AI bots. *)
 
 module Game_kind : sig
   type t =
@@ -13,12 +14,12 @@ module Game_kind : sig
   val to_string : t -> string
   val to_string_hum : t -> string
 
-  (** [board_length] returns the length of the board. 3 for [ Tic_tac_toe ] and
-      15 for [Omok]. *)
+  (** [board_length] returns the length of the board. 3 for [ Tic_tac_toe ]
+      and 15 for [Omok]. *)
   val board_length : t -> int
 
-  (** [win_length] returns the winning length of the board. 3 for [ Tic_tac_toe ] and
-      5 for [Omok]. *)
+  (** [win_length] returns the winning length of the board. 3 for
+      [ Tic_tac_toe ] and 5 for [Omok]. *)
   val win_length : t -> int
 end
 
@@ -98,12 +99,7 @@ module Piece : sig
   val of_string : string -> t
   val to_string : t -> string
 
-  (* [flip] gives you the "other" piece.
-
-    | X -> O
-    | O -> X
-
-   *)
+  (* [flip] gives you the "other" piece. | X -> O | O -> X *)
   val flip : t -> t
 end
 
@@ -121,7 +117,7 @@ module Position : sig
 
   val to_string : t -> string
   val in_bounds : t -> game_kind:Game_kind.t -> bool
-  
+
   (** [down t] is [t]'s downwards neighbor. *)
   val down : t -> t
 
@@ -133,7 +129,6 @@ module Position : sig
 
   (** [left t] is [t]'s leftwards neighbor. *)
   val left : t -> t
-
 
   (** [all_offsets] is a list of functions to compute all 8 neighbors of a
       cell (i.e. left, up-left, up, up-right, right, right-down, down,
@@ -151,7 +146,6 @@ module Game_status : sig
 end
 
 module Game_state : sig
-
   (** [Game_state.t] represents a game with two players. *)
   type t =
     { game_id : Game_id.t

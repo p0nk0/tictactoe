@@ -17,9 +17,18 @@ val join_existing_game
   -> query:Game_id.t With_username.t
   -> Join_existing_game.Response.t Deferred.Or_error.t
 
-val show_all_games_with_two_players : t -> Game_state.t Game_id.Map.t Deferred.Or_error.t
-val get_game : t -> query:Game_id.t -> Get_game.Response.t Deferred.Or_error.t
-val list_all_joinable_games : t -> Joinable_game.t Game_id.Map.t Deferred.Or_error.t
+val show_all_games_with_two_players
+  :  t
+  -> Game_state.t Game_id.Map.t Deferred.Or_error.t
+
+val get_game
+  :  t
+  -> query:Game_id.t
+  -> Get_game.Response.t Deferred.Or_error.t
+
+val list_all_joinable_games
+  :  t
+  -> Joinable_game.t Game_id.Map.t Deferred.Or_error.t
 
 val take_turn
   :  t

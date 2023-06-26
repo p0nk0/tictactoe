@@ -17,7 +17,9 @@ let run () =
   Async_js.init ();
   let url = Url_var.value url_var in
   let set_url = Url_var.set_effect url_var in
-  let () = Bonsai_web.Start.start (App.component ~random_image ~url ~set_url) in
+  let () =
+    Bonsai_web.Start.start (App.component ~random_image ~url ~set_url)
+  in
   Deferred.never ()
 ;;
 

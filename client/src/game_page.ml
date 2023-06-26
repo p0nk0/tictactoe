@@ -60,7 +60,8 @@ let render_title ~(game_state : Game_state.t Value.t) =
           ; Rendering_utils.render_game_kind theme game_kind
           ; (match is_it_my_turn, did_i_win with
              | false, false -> Rendering_utils.render_game_status game_state
-             | true, _ -> Chip.render_chip ~theme ~intent:Warning "Your turn!"
+             | true, _ ->
+               Chip.render_chip ~theme ~intent:Warning "Your turn!"
              | _, true -> Chip.render_chip ~theme ~intent:Success "You win!")
           ; (match is_thinking with
              | true -> Loading.vdom
@@ -130,9 +131,15 @@ let render_board ~(game_state : Game_state.t Value.t) =
                       X)
                ])
         | Some X ->
-          Feather_icon.svg ~size:(`Rem 2.5) ~stroke:constants.primary.foreground X
+          Feather_icon.svg
+            ~size:(`Rem 2.5)
+            ~stroke:constants.primary.foreground
+            X
         | Some O ->
-          Feather_icon.svg ~size:(`Rem 2.5) ~stroke:constants.primary.foreground Circle
+          Feather_icon.svg
+            ~size:(`Rem 2.5)
+            ~stroke:constants.primary.foreground
+            Circle
       in
       let maybe_take_turn_attr =
         match Map.find pieces position with
@@ -148,7 +155,8 @@ let render_board ~(game_state : Game_state.t Value.t) =
            | true -> Style.winning_game_cell)
       in
       Vdom.Node.div
-        ~attrs:[ Style.game_cell; is_winning_game_cell; maybe_take_turn_attr ]
+        ~attrs:
+          [ Style.game_cell; is_winning_game_cell; maybe_take_turn_attr ]
         [ content ])
   in
   Vdom.Node.div ~attrs:[ game_board_attribute ] cells
@@ -164,7 +172,8 @@ let body ~game_id =
        let%arr game_id = game_id in
        Vdom.Node.div
          ~attrs:[ Style.game_error_page ]
-         [ Error_page.error ~message:[%string "Game '%{game_id#Game_id}' does not exist!"]
+         [ Error_page.error
+             ~message:[%string "Game '%{game_id#Game_id}' does not exist!"]
          ]
      | Waiting_for_someone_to_join joinable_game ->
        let%arr { game_id; _ } = joinable_game in
@@ -172,7 +181,8 @@ let body ~game_id =
          ~attrs:[ Style.game_error_page ]
          [ Error_page.error
              ~message:
-               [%string "Game '%{game_id#Game_id}' is waiting for someone to join!"]
+               [%string
+                 "Game '%{game_id#Game_id}' is waiting for someone to join!"]
          ]
      | Both_players game_state ->
        let%sub title = render_title ~game_state in
@@ -184,7 +194,9 @@ let body ~game_id =
          ~cross_axis_alignment:Center
          [ Vdom.Node.div
              [ Vdom.Node.div ~attrs:[ Style.full_width ] [ title ]
-             ; Vdom.Node.div ~attrs:[ Style.surrounding_game_wrapper ] [ board ]
+             ; Vdom.Node.div
+                 ~attrs:[ Style.surrounding_game_wrapper ]
+                 [ board ]
              ]
          ])
 ;;
@@ -195,7 +207,10 @@ let component ~navbar ~game_id =
   and body = body in
   Vdom.Node.div
     ~attrs:[ Style.grid_container ]
-    [ Vdom.Node.div ~key:"navbar" ~attrs:[ Style.grid_item_navbar ] [ navbar ]
+    [ Vdom.Node.div
+        ~key:"navbar"
+        ~attrs:[ Style.grid_item_navbar ]
+        [ navbar ]
     ; Vdom.Node.div ~attrs:[ Style.grid_item_levels_2_and_3 ] [ body ]
     ]
 ;;

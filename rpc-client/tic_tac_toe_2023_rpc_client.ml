@@ -20,7 +20,11 @@ let show_all_games_with_two_players t =
 ;;
 
 let get_game = create_binding Get_game.rpc
-let list_all_joinable_games t = create_binding List_all_joinable_games.rpc t ~query:()
+
+let list_all_joinable_games t =
+  create_binding List_all_joinable_games.rpc t ~query:()
+;;
+
 let take_turn = create_binding Take_turn.rpc
 let me t = create_binding Me.rpc t ~query:()
 
@@ -57,7 +61,9 @@ let game_loop t ~refresh_rate ~me ~game_id ~(game_ai : game_ai) =
           | true ->
             let position = game_ai ~me:piece ~game_state in
             let%bind response =
-              take_turn t ~query:{ username = me; txt = { position; game_id } }
+              take_turn
+                t
+                ~query:{ username = me; txt = { position; game_id } }
             in
             (match response with
              | Take_turn.Response.Ok ->
@@ -68,7 +74,8 @@ let game_loop t ~refresh_rate ~me ~game_id ~(game_ai : game_ai) =
                | Take_turn.Response.Position_out_of_bounds
                | Take_turn.Response.Position_already_occupied
                | Take_turn.Response.Game_is_over
-               | Take_turn.Response.You_are_not_a_player_in_this_game ) as error ->
+               | Take_turn.Response.You_are_not_a_player_in_this_game ) as
+               error ->
                let msg =
                  [%message
                    "whoops there was an error while placing a turn"
@@ -78,42 +85,68 @@ let game_loop t ~refresh_rate ~me ~game_id ~(game_ai : game_ai) =
                Deferred.return (Error (Error.of_string (Sexp.to_string msg)))))))
 ;;
 
-let create_game_and_play t ~me ~against ~game_kind ~(game_ai : game_ai) ~refresh_rate =
+let create_game_and_play
+  t
+  ~me
+  ~against
+  ~game_kind
+  ~(game_ai : game_ai)
+  ~refresh_rate
+  =
   let open Deferred.Or_error.Let_syntax in
   let%bind game_id =
     create_game
       t
-      ~query:{ username = me; txt = { game_kind; against_server_bot = against } }
+      ~query:
+        { username = me; txt = { game_kind; against_server_bot = against } }
   in
-  print_endline [%string "successfully created game with id: '%{game_id#Game_id}'"];
+  print_endline
+    [%string "successfully created game with id: '%{game_id#Game_id}'"];
   game_loop t ~me ~game_id ~game_ai ~refresh_rate
 ;;
 
 let join_game_and_play t ~game_id ~me ~(game_ai : game_ai) ~refresh_rate =
   let open Deferred.Or_error.Let_syntax in
-  let%bind response = join_existing_game t ~query:{ username = me; txt = game_id } in
+  let%bind response =
+    join_existing_game t ~query:{ username = me; txt = game_id }
+  in
   match response with
   | Ok | You've_already_joined_this_game ->
     print_endline "successfully joined game";
     game_loop t ~game_id ~me ~game_ai ~refresh_rate
-  | (Game_already_ended | Game_already_full | Game_does_not_exist) as error ->
+  | (Game_already_ended | Game_already_full | Game_does_not_exist) as error
+    ->
     Deferred.Or_error.error_s
       [%message
-        "Error while attempting to join game: " (error : Join_existing_game.Response.t)]
+        "Error while attempting to join game: "
+          (error : Join_existing_game.Response.t)]
 ;;
 
-let create_game_and_play_against_self t ~me ~game_kind ~(game_ai : game_ai) ~refresh_rate =
+let create_game_and_play_against_self
+  t
+  ~me
+  ~game_kind
+  ~(game_ai : game_ai)
+  ~refresh_rate
+  =
   let open Deferred.Or_error.Let_syntax in
   let%bind game_id =
-    create_game t ~query:{ username = me; txt = { game_kind; against_server_bot = None } }
+    create_game
+      t
+      ~query:
+        { username = me; txt = { game_kind; against_server_bot = None } }
   in
-  let%bind response = join_existing_game t ~query:{ username = me; txt = game_id } in
+  let%bind response =
+    join_existing_game t ~query:{ username = me; txt = game_id }
+  in
   match response with
   | Ok | You've_already_joined_this_game ->
     print_endline "successfully joined game";
     game_loop t ~game_id ~me ~game_ai ~refresh_rate
-  | (Game_already_ended | Game_already_full | Game_does_not_exist) as error ->
+  | (Game_already_ended | Game_already_full | Game_does_not_exist) as error
+    ->
     Deferred.Or_error.error_s
       [%message
-        "Error while attempting to join game: " (error : Join_existing_game.Response.t)]
+        "Error while attempting to join game: "
+          (error : Join_existing_game.Response.t)]
 ;;

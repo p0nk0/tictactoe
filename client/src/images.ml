@@ -41,9 +41,11 @@ let description = function
   | Capybara -> {|"Capybaras shopping for groceries, ukiyo-e."|}
   | Abstract_camels ->
     {|"Renaissance Painting of a robot and a camel playing tic tac toe."|}
-  | Camel_v_robot -> {|"An impressionist oil painting of a camel playing tic tac toe."|}
+  | Camel_v_robot ->
+    {|"An impressionist oil painting of a camel playing tic tac toe."|}
   | Capybara_v_camel -> {|"A capybara playing tic tac toe against a camel."|}
-  | Camel_v_camel -> {|"A camel playing tic tac toe against a robot, ukiyo-e."|}
+  | Camel_v_camel ->
+    {|"A camel playing tic tac toe against a robot, ukiyo-e."|}
 ;;
 
 let vdom image =
@@ -53,7 +55,8 @@ let vdom image =
       ; Style.homepage_painting
       ; Vdom.Attr.create
           "alt"
-          "Dalle image of animals/robots playing tictactoe or going to groceries"
+          "Dalle image of animals/robots playing tictactoe or going to \
+           groceries"
       ]
     ()
 ;;

@@ -14,20 +14,11 @@ module Game_kind = struct
     |> sexp_of_t
     |> Sexp.to_string_hum
     |> String.lowercase
-    |> String.map ~f:(function
-      | '_' -> ' '
-      | x -> x)
+    |> String.map ~f:(function '_' -> ' ' | x -> x)
   ;;
 
-  let board_length = function
-    | Tic_tac_toe -> 3
-    | Omok -> 15
-  ;;
-
-  let win_length = function
-    | Tic_tac_toe -> 3
-    | Omok -> 5
-  ;;
+  let board_length = function Tic_tac_toe -> 3 | Omok -> 15
+  let win_length = function Tic_tac_toe -> 3 | Omok -> 5
 end
 
 module Difficulty = struct
@@ -118,11 +109,7 @@ module Piece = struct
 
   let of_string = Fn.compose t_of_sexp Sexp.of_string
   let to_string = Fn.compose Sexp.to_string_hum sexp_of_t
-
-  let flip = function
-    | X -> O
-    | O -> X
-  ;;
+  let flip = function X -> O | O -> X
 end
 
 module Position = struct
@@ -152,7 +139,15 @@ module Position = struct
 
   let all_offsets =
     let ( >> ) = Fn.compose in
-    [ up; up >> right; right; right >> down; down; down >> left; left; left >> up ]
+    [ up
+    ; up >> right
+    ; right
+    ; right >> down
+    ; down
+    ; down >> left
+    ; left
+    ; left >> up
+    ]
   ;;
 end
 
@@ -175,12 +170,12 @@ module Game_state = struct
   [@@deriving sexp_of, equal, bin_io]
 
   let get_player t ~piece =
-    match piece with
-    | Piece.X -> t.player_x
-    | O -> t.player_o
+    match piece with Piece.X -> t.player_x | O -> t.player_o
   ;;
 
-  let to_string_hum { game_id; game_kind; player_x; player_o; pieces; game_status } =
+  let to_string_hum
+    { game_id; game_kind; player_x; player_o; pieces; game_status }
+    =
     let board_length = Game_kind.board_length game_kind in
     let rows =
       List.init board_length ~f:(fun row ->
@@ -289,7 +284,9 @@ module World_state = struct
     }
   [@@deriving bin_io, sexp_of, equal]
 
-  let empty = { joinable_games = Game_id.Map.empty; running_games = Game_id.Map.empty }
+  let empty =
+    { joinable_games = Game_id.Map.empty; running_games = Game_id.Map.empty }
+  ;;
 end
 
 module Me = struct

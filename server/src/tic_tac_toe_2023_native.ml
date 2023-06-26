@@ -4,10 +4,10 @@ open Tic_tac_toe_2023_common
 open Protocol
 
 let initialize_connection
-  :  unit -> Rpc_websocket.Rpc.Connection_initiated_from.t -> Socket.Address.Inet.t
-    -> Rpc.Connection.t -> 's
+  :  unit -> Rpc_websocket.Rpc.Connection_initiated_from.t
+  -> Socket.Address.Inet.t -> Rpc.Connection.t -> 's
   =
-  fun () _initiated_from inet connection ->
+ fun () _initiated_from inet connection ->
   let user =
     let address = Socket.Address.to_string inet in
     match String.split ~on:':' address with
@@ -23,11 +23,17 @@ let main ~js_file ~port =
   let%bind server =
     let open Cohttp_static_handler in
     let javascript =
-      Asset.local Asset.Kind.javascript (Asset.What_to_serve.file ~path:js_file)
+      Asset.local
+        Asset.Kind.javascript
+        (Asset.What_to_serve.file ~path:js_file)
     in
-    let sourcemap_file = String.chop_suffix_exn js_file ~suffix:".js" ^ ".map" in
+    let sourcemap_file =
+      String.chop_suffix_exn js_file ~suffix:".js" ^ ".map"
+    in
     let sourcemap =
-      Asset.local Asset.Kind.sourcemap (Asset.What_to_serve.file ~path:sourcemap_file)
+      Asset.local
+        Asset.Kind.sourcemap
+        (Asset.What_to_serve.file ~path:sourcemap_file)
     in
     let http_handler () =
       Single_page_handler.create_handler
@@ -53,12 +59,17 @@ let command =
   Command.async
     ~summary:"Start server for example [starter_template]"
     (let%map_open.Command port =
-       flag "port" (optional_with_default 8080 int) ~doc:"port on which to serve"
+       flag
+         "port"
+         (optional_with_default 8080 int)
+         ~doc:"port on which to serve"
      and js_file =
        flag
          "js-file"
          (required Filename_unix.arg_type)
-         ~doc:"FILENAME The path to the JavaScript file which is served by the web server"
+         ~doc:
+           "FILENAME The path to the JavaScript file which is served by the \
+            web server"
      in
      fun () -> main ~js_file ~port)
 ;;

@@ -9,10 +9,13 @@ let empty_pieces ~game_state =
     let%map.List column = List.init length ~f:Fn.id in
     { Position.row; column }
   in
-  List.filter all_positions ~f:(fun position -> not (Map.mem game_state.pieces position))
+  List.filter all_positions ~f:(fun position ->
+    not (Map.mem game_state.pieces position))
 ;;
 
-let compute_next_move ~me:(_ : Piece.t) ~(game_state : Game_state.t) : Position.t =
+let compute_next_move ~me:(_ : Piece.t) ~(game_state : Game_state.t)
+  : Position.t
+  =
   List.random_element_exn
     ~random_state:(Core.Random.State.make [| 42 |])
     (empty_pieces ~game_state)

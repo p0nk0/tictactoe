@@ -12,10 +12,12 @@ type t =
 let to_string_hum t =
   let { World_state.running_games; joinable_games } = t.world_state in
   let joinable_games =
-    Sexp.to_string [%message (joinable_games : Joinable_game.t Game_id.Map.t)]
+    Sexp.to_string
+      [%message (joinable_games : Joinable_game.t Game_id.Map.t)]
   in
   let running_games =
-    String.concat_lines (Map.data running_games |> List.map ~f:Game_state.to_string_hum)
+    String.concat_lines
+      (Map.data running_games |> List.map ~f:Game_state.to_string_hum)
   in
   [%string "next_id: %{t.next_id#Int}\n%{joinable_games}\n%{running_games}"]
 ;;
@@ -25,17 +27,25 @@ let new_id t =
   Game_id.of_string (Int.to_string t.next_id)
 ;;
 
-let create ~world_state = { world_state; next_id = 0; thinking = Game_id.Set.empty }
+let create ~world_state =
+  { world_state; next_id = 0; thinking = Game_id.Set.empty }
+;;
 
 let create_new_joinable_game t ~game_kind ~first_player =
   let game_id = new_id t in
   let new_joinable_game =
-    { Joinable_game.game_id; game_kind; player_x = Player.Player first_player }
+    { Joinable_game.game_id
+    ; game_kind
+    ; player_x = Player.Player first_player
+    }
   in
   let new_world_state =
     { t.world_state with
       joinable_games =
-        Map.add_exn t.world_state.joinable_games ~key:game_id ~data:new_joinable_game
+        Map.add_exn
+          t.world_state.joinable_games
+          ~key:game_id
+          ~data:new_joinable_game
     }
   in
   t.world_state <- new_world_state;
@@ -55,23 +65,30 @@ let create_new_game_against_bot t ~game_kind ~first_player ~difficulty =
   in
   let new_world_state =
     { t.world_state with
-      running_games = Map.add_exn t.world_state.running_games ~key:game_id ~data:new_game
+      running_games =
+        Map.add_exn t.world_state.running_games ~key:game_id ~data:new_game
     }
   in
   t.world_state <- new_world_state;
   game_id
 ;;
 
-let create_game t ~first_player ~query:{ Create_game.Query.game_kind; against_server_bot }
+let create_game
+  t
+  ~first_player
+  ~query:{ Create_game.Query.game_kind; against_server_bot }
   =
   match against_server_bot with
   | None -> create_new_joinable_game t ~game_kind ~first_player
-  | Some difficulty -> create_new_game_against_bot t ~game_kind ~first_player ~difficulty
+  | Some difficulty ->
+    create_new_game_against_bot t ~game_kind ~first_player ~difficulty
 ;;
 
 let start_joinable_game t ~second_player ~joinable_game =
   let new_joinable_games =
-    Map.remove t.world_state.joinable_games joinable_game.Joinable_game.game_id
+    Map.remove
+      t.world_state.joinable_games
+      joinable_game.Joinable_game.game_id
   in
   let new_running_games =
     let new_game =
@@ -83,10 +100,15 @@ let start_joinable_game t ~second_player ~joinable_game =
       ; pieces = Position.Map.empty
       }
     in
-    Map.add_exn t.world_state.running_games ~key:joinable_game.game_id ~data:new_game
+    Map.add_exn
+      t.world_state.running_games
+      ~key:joinable_game.game_id
+      ~data:new_game
   in
   t.world_state
-  <- { joinable_games = new_joinable_games; running_games = new_running_games };
+    <- { joinable_games = new_joinable_games
+       ; running_games = new_running_games
+       };
   Join_existing_game.Response.Ok
 ;;
 
@@ -98,8 +120,9 @@ let join_game t ~second_player ~game_id =
      | None -> Game_does_not_exist
      | Some running_game ->
        (match
-          List.exists [ running_game.player_o; running_game.player_x ] ~f:(fun player ->
-            Player.equal player (Player second_player))
+          List.exists
+            [ running_game.player_o; running_game.player_x ]
+            ~f:(fun player -> Player.equal player (Player second_player))
         with
         | true -> You've_already_joined_this_game
         | false ->
@@ -141,7 +164,8 @@ let is_board_full ~game_kind pieces =
 
 let compute_next_game_status pieces ~current_piece ~game_kind =
   match Traverse.did_piece_win ~piece:current_piece ~game_kind pieces with
-  | Some positions -> Game_status.Game_over { winner = Some (current_piece, positions) }
+  | Some positions ->
+    Game_status.Game_over { winner = Some (current_piece, positions) }
   | None ->
     (match is_board_full pieces ~game_kind with
      | true -> Game_status.Game_over { winner = None }
@@ -160,7 +184,8 @@ let rec maybe_take_server_ai_turn t ~game_state : unit Deferred.t =
          In_thread.run (fun () ->
            match difficulty with
            | Easy -> Easy.compute_next_move ~me:piece ~game_state
-           | Medium -> Medium.compute_next_move ~depth:2 ~me:piece ~game_state
+           | Medium ->
+             Medium.compute_next_move ~depth:2 ~me:piece ~game_state
            | Hard ->
              Medium.compute_next_move
                ~depth:
@@ -171,13 +196,29 @@ let rec maybe_take_server_ai_turn t ~game_state : unit Deferred.t =
                ~game_state)
        in
        t.thinking <- Set.remove t.thinking game_state.game_id;
-       actually_take_turn t ~game_id:game_state.game_id ~position ~game_state ~piece)
+       actually_take_turn
+         t
+         ~game_id:game_state.game_id
+         ~position
+         ~game_state
+         ~piece)
 
-and actually_take_turn t ~game_id ~position ~(game_state : Game_state.t) ~piece =
+and actually_take_turn
+  t
+  ~game_id
+  ~position
+  ~(game_state : Game_state.t)
+  ~piece
+  =
   let new_running_game_after_next_move =
-    let pieces = Map.add_exn game_state.Game_state.pieces ~key:position ~data:piece in
+    let pieces =
+      Map.add_exn game_state.Game_state.pieces ~key:position ~data:piece
+    in
     let game_status =
-      compute_next_game_status ~current_piece:piece ~game_kind:game_state.game_kind pieces
+      compute_next_game_status
+        ~current_piece:piece
+        ~game_kind:game_state.game_kind
+        pieces
     in
     { Game_state.pieces
     ; game_status
@@ -200,7 +241,9 @@ and actually_take_turn t ~game_id ~position ~(game_state : Game_state.t) ~piece 
   maybe_take_server_ai_turn t ~game_state:new_running_game_after_next_move
 ;;
 
-let take_turn t ~game_id ~position ~username : Take_turn.Response.t Deferred.t =
+let take_turn t ~game_id ~position ~username
+  : Take_turn.Response.t Deferred.t
+  =
   let open Deferred.Let_syntax in
   let open Take_turn.Response in
   match Map.find t.world_state.running_games game_id with
@@ -210,7 +253,9 @@ let take_turn t ~game_id ~position ~username : Take_turn.Response.t Deferred.t =
      | Game_status.Game_over _ -> return Game_is_over
      | Game_status.Turn_of piece ->
        let is_current_player's_turn =
-         Player.equal (Game_state.get_player game_state ~piece) (Player username)
+         Player.equal
+           (Game_state.get_player game_state ~piece)
+           (Player username)
        in
        (match is_current_player's_turn with
         | false ->
@@ -223,7 +268,9 @@ let take_turn t ~game_id ~position ~username : Take_turn.Response.t Deferred.t =
            | true -> return Not_your_turn
            | false -> return You_are_not_a_player_in_this_game)
         | true ->
-          (match Position.in_bounds position ~game_kind:game_state.game_kind with
+          (match
+             Position.in_bounds position ~game_kind:game_state.game_kind
+           with
            | false -> return Position_out_of_bounds
            | true ->
              (match Map.find game_state.pieces position with

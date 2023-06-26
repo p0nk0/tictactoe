@@ -23,7 +23,9 @@ let vdom =
     | false -> Feather_icon.Moon
   in
   let setter = Vdom.Attr.on_click (fun _ -> setter (not is_dark)) in
-  let message = View.text [%string {|%{if is_dark then "Light" else "Dark"} theme|}] in
+  let message =
+    View.text [%string {|%{if is_dark then "Light" else "Dark"} theme|}]
+  in
   View.vbox
     ~main_axis_alignment:Center
     ~cross_axis_alignment:Center

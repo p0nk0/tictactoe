@@ -3,13 +3,18 @@ open! Async
 open Tic_tac_toe_2023_common
 open Protocol
 
-(** Represents the overall state of the application.  *)
+(** Represents the overall state of the application. *)
 
 type t
 
 val to_string_hum : t -> string
 val create : world_state:World_state.t -> t
-val create_game : t -> first_player:Username.t -> query:Create_game.Query.t -> Game_id.t
+
+val create_game
+  :  t
+  -> first_player:Username.t
+  -> query:Create_game.Query.t
+  -> Game_id.t
 
 val join_game
   :  t

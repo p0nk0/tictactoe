@@ -7,9 +7,9 @@ module Popover = Bonsai_web_ui_popover
 module Form = Bonsai_web_ui_form
 
 module No_td_padding_please =
-  [%css
-    stylesheet
-      {|
+[%css
+stylesheet
+  {|
   .target td {
      /* sorry >.> */
      padding-right: 0px !important;
@@ -31,9 +31,14 @@ let component ~url ~set_url =
           ~alignment:(Value.return Popover.Alignment.Center)
           ~popover:(fun ~close:_ ->
             let%sub form =
-              let%sub form = Form.Elements.Textbox.string ~placeholder:"Username" () in
+              let%sub form =
+                Form.Elements.Textbox.string ~placeholder:"Username" ()
+              in
               let%arr form = form in
-              Form.project form ~parse_exn:Username.of_string ~unparse:Username.to_string
+              Form.project
+                form
+                ~parse_exn:Username.of_string
+                ~unparse:Username.to_string
             in
             let%sub form = Form.Dynamic.with_default me form in
             let%sub theme = View.Theme.current in
@@ -49,8 +54,11 @@ let component ~url ~set_url =
                   form
                   ~theme
                   ~on_submit:
-                    (Form.Submit.create ~button:None ~handle_enter:true () ~f:(fun data ->
-                       Services.set_me data))
+                    (Form.Submit.create
+                       ~button:None
+                       ~handle_enter:true
+                       ()
+                       ~f:(fun data -> Services.set_me data))
               ; View.button
                   ~attrs:
                     (match Username.equal data me with
@@ -109,6 +117,9 @@ let component ~url ~set_url =
             ; View.text ~attrs:[ Style.bold; Style.no_select ] "Tic Tac Toe"
             ]
         ]
-    ; View.hbox ~cross_axis_alignment:Center ~gap:(`Em 1) [ user; theme_picker ]
+    ; View.hbox
+        ~cross_axis_alignment:Center
+        ~gap:(`Em 1)
+        [ user; theme_picker ]
     ]
 ;;

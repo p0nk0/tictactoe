@@ -2,8 +2,8 @@ open! Core
 open Tic_tac_toe_2023_common
 open Protocol
 
-(** The [Page] module represents the structure of your sites URL and is
-    ursed for URL routing for your site. *)
+(** The [Page] module represents the structure of your sites URL and is ursed
+    for URL routing for your site. *)
 
 type t =
   | Homepage

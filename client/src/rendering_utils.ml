@@ -15,7 +15,8 @@ let piece_to_string ~piece ~game_state =
 
 let render_game_status (game_state : Game_state.t) =
   match game_state.game_status with
-  | Turn_of piece -> View.textf "%s's turn" (piece_to_string ~piece ~game_state)
+  | Turn_of piece ->
+    View.textf "%s's turn" (piece_to_string ~piece ~game_state)
   | Game_over { winner = None } -> View.text "tie"
   | Game_over { winner = Some (piece, _winning_pieces) } ->
     View.textf "Winner: %s" (piece_to_string ~piece ~game_state)

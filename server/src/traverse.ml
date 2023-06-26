@@ -10,13 +10,13 @@ module Traversal_result = struct
 end
 
 let rec traverse
-          ~n
-          ~pieces
-          ~expected_piece
-          ~position
-          ~compute_next_position
-          ~game_kind
-          ~seen_positions
+  ~n
+  ~pieces
+  ~expected_piece
+  ~position
+  ~compute_next_position
+  ~game_kind
+  ~seen_positions
   : Traversal_result.t
   =
   let saw_consecutive =
@@ -47,9 +47,9 @@ let rec traverse
 ;;
 
 let did_piece_win
-      ~(piece : Piece.t)
-      ~(game_kind : Game_kind.t)
-      (pieces : Piece.t Position.Map.t)
+  ~(piece : Piece.t)
+  ~(game_kind : Game_kind.t)
+  (pieces : Piece.t Position.Map.t)
   : Position.Set.t option
   =
   let win_length = Game_kind.win_length game_kind in
@@ -76,9 +76,9 @@ let did_piece_win
 ;;
 
 let score_for_piece
-      ~(piece : Piece.t)
-      ~(game_kind : Game_kind.t)
-      (pieces : Piece.t Position.Map.t)
+  ~(piece : Piece.t)
+  ~(game_kind : Game_kind.t)
+  (pieces : Piece.t Position.Map.t)
   : float
   =
   let win_length = Game_kind.win_length game_kind in

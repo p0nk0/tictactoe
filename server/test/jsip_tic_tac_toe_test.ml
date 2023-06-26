@@ -48,7 +48,10 @@ let%expect_test "[create]'ing and [join]'ing a game" =
     State.create_game
       state
       ~first_player
-      ~query:{ Create_game.Query.against_server_bot = None; game_kind = Tic_tac_toe }
+      ~query:
+        { Create_game.Query.against_server_bot = None
+        ; game_kind = Tic_tac_toe
+        }
   in
   print_state state;
   [%expect
@@ -72,10 +75,16 @@ let%expect_test "Attempting to join an already existing game" =
     State.create_game
       state
       ~first_player:(Username.of_string "charmander")
-      ~query:{ Create_game.Query.against_server_bot = None; game_kind = Tic_tac_toe }
+      ~query:
+        { Create_game.Query.against_server_bot = None
+        ; game_kind = Tic_tac_toe
+        }
   in
   let _response =
-    State.join_game state ~second_player:(Username.of_string "bulbasaur") ~game_id
+    State.join_game
+      state
+      ~second_player:(Username.of_string "bulbasaur")
+      ~game_id
   in
   print_state state;
   [%expect
@@ -83,7 +92,9 @@ let%expect_test "Attempting to join an already existing game" =
     next_id: 1
     (joinable_games())
     ((game_id 1)(game_kind Tic_tac_toe)(player_x(Player charmander))(player_o(Player bulbasaur))(game_status(Turn_of X))) |}];
-  let response = State.join_game state ~second_player:third_player ~game_id in
+  let response =
+    State.join_game state ~second_player:third_player ~game_id
+  in
   print_s [%message (response : Join_existing_game.Response.t)];
   [%expect {| (response Game_already_full) |}]
 ;;
@@ -91,20 +102,25 @@ let%expect_test "Attempting to join an already existing game" =
 let%expect_test "Attempting to join a game that does not exist" =
   let state = State.create ~world_state:World_state.empty in
   let game_id = Game_id.of_string "2" in
-  let response = State.join_game state ~second_player:third_player ~game_id in
+  let response =
+    State.join_game state ~second_player:third_player ~game_id
+  in
   print_s [%message (response : Join_existing_game.Response.t)];
   [%expect {| (response Game_does_not_exist) |}]
 ;;
 
-let%expect_test "[create]'ing a game against an AI results in the game being immediately \
-                 joined"
+let%expect_test "[create]'ing a game against an AI results in the game \
+                 being immediately joined"
   =
   let state = State.create ~world_state:World_state.empty in
   let _game_id =
     State.create_game
       state
       ~first_player
-      ~query:{ Create_game.Query.against_server_bot = Some Easy; game_kind = Tic_tac_toe }
+      ~query:
+        { Create_game.Query.against_server_bot = Some Easy
+        ; game_kind = Tic_tac_toe
+        }
   in
   print_state state;
   [%expect
@@ -125,7 +141,10 @@ let%test_module "taking turns" =
         State.create_game
           state
           ~first_player
-          ~query:{ Create_game.Query.against_server_bot = None; game_kind = Tic_tac_toe }
+          ~query:
+            { Create_game.Query.against_server_bot = None
+            ; game_kind = Tic_tac_toe
+            }
       in
       let _response = State.join_game state ~second_player ~game_id in
       game_id, state
@@ -239,9 +258,16 @@ let%test_module "taking turns" =
     ;;
 
     let test_sequence_of_turns state ~game_id ~moves =
-      Deferred.List.iteri ~how:`Sequential moves ~f:(fun i (player, row, column) ->
+      Deferred.List.iteri
+        ~how:`Sequential
+        moves
+        ~f:(fun i (player, row, column) ->
         let%bind response =
-          State.take_turn state ~game_id ~position:{ row; column } ~username:player
+          State.take_turn
+            state
+            ~game_id
+            ~position:{ row; column }
+            ~username:player
         in
         print_s [%message (i : int) (response : Take_turn.Response.t)];
         return ())
@@ -409,7 +435,10 @@ let%expect_test "Taking turns against an AI results in the AI making moves." =
     State.create_game
       state
       ~first_player
-      ~query:{ Create_game.Query.against_server_bot = Some Easy; game_kind = Tic_tac_toe }
+      ~query:
+        { Create_game.Query.against_server_bot = Some Easy
+        ; game_kind = Tic_tac_toe
+        }
   in
   let _response =
     State.take_turn
@@ -427,13 +456,18 @@ let%expect_test "Taking turns against an AI results in the AI making moves." =
     X |}]
 ;;
 
-let%expect_test "Taking turns against an AI results in the AI making moves. - medium" =
+let%expect_test "Taking turns against an AI results in the AI making moves. \
+                 - medium"
+  =
   let state = State.create ~world_state:World_state.empty in
   let game_id =
     State.create_game
       state
       ~first_player
-      ~query:{ Create_game.Query.against_server_bot = Some Hard; game_kind = Tic_tac_toe }
+      ~query:
+        { Create_game.Query.against_server_bot = Some Hard
+        ; game_kind = Tic_tac_toe
+        }
   in
   let _response =
     State.take_turn

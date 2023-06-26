@@ -1,10 +1,11 @@
-(executables 
-  (names main send_mock_rpc)
-  (preprocess (pps ppx_jane))
-  (libraries 
-    async
-    tictactoe_game_ai
-    core
-    tic_tac_toe_2023_native
-    tic_tac_toe_2023_rpc_client
-    core_unix.command_unix))
+(executables
+ (names main send_mock_rpc)
+ (preprocess
+  (pps ppx_jane))
+ (libraries
+  async
+  tictactoe_game_ai
+  core
+  tic_tac_toe_2023_native
+  tic_tac_toe_2023_rpc_client
+  core_unix.command_unix))

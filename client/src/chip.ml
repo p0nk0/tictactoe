@@ -3,7 +3,9 @@ open Bonsai_web
 
 let render_chip ~theme ~intent text =
   let is_dark = (View.constants theme).is_dark in
-  let { View.Fg_bg.foreground; background } = View.intent_colors theme intent in
+  let { View.Fg_bg.foreground; background } =
+    View.intent_colors theme intent
+  in
   Vdom.Node.div
     ~attrs:
       [ Vdom.Attr.style

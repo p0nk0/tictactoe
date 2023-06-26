@@ -1,5 +1,6 @@
-(library 
-  (name tictactoe_game_ai)
-  (inline_tests)
-  (preprocess (pps ppx_jane))
-  (libraries tic_tac_toe_2023_common))
+(library
+ (name tictactoe_game_ai)
+ (inline_tests)
+ (preprocess
+  (pps ppx_jane))
+ (libraries tic_tac_toe_2023_common))
