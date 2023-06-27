@@ -393,10 +393,15 @@ let winning_moves
   ~(pieces : Piece.t Position.Map.t)
   : Position.t list
   =
-  ignore me;
-  ignore game_kind;
-  ignore pieces;
-  failwith "Implement me!"
+  let f pos =
+    let new_pieces = Map.set pieces ~key:pos ~data:me in
+    match evaluate ~game_kind ~pieces:new_pieces with
+    | Game_over { winner = Some n } -> Piece.equal n me
+    | Game_over { winner = None } -> false
+    | Game_continues -> false
+    | Illegal_state -> failwith "illegal state"
+  in
+  List.filter (available_moves ~game_kind ~pieces) ~f
 ;;
 
 (* Exercise 4. *)
@@ -530,10 +535,8 @@ let%expect_test "no available_moves" =
   [%expect {| () |}]
 ;;
 
-let%expect_test "print time" =
-  print_endline (Game_state.to_string_hum minor_diag_win_for_x_omok);
-  [%expect {||}]
-;;
+(* let%expect_test "print time" = print_endline (Game_state.to_string_hum
+   minor_diag_win_for_x_omok); [%expect {||}] ;; *)
 
 (* When you've implemented the [evaluate] function, uncomment the next two
    tests! *)
@@ -626,12 +629,25 @@ let%expect_test "evaluate minor_diag_win_for_x_2_omok" =
 
 (* When you've implemented the [winning_moves] function, uncomment this
    test! *)
-(*let%expect_test "winning_move" = let positions = winning_moves
-  ~game_kind:non_win.game_kind ~pieces:non_win.pieces ~me:Piece.X in print_s
-  [%sexp (positions : Position.t list)]; [%expect {| ((((row 1) (column 1))))
-  |}]; let positions = winning_moves ~game_kind:non_win.game_kind
-  ~pieces:non_win.pieces ~me:Piece.O in print_s [%sexp (positions :
-  Position.t list)]; [%expect {| () |}] ;;*)
+let%expect_test "winning_move" =
+  let positions =
+    winning_moves
+      ~game_kind:non_win.game_kind
+      ~pieces:non_win.pieces
+      ~me:Piece.X
+  in
+  print_s [%sexp (positions : Position.t list)];
+  [%expect {| (((row 1) (column 1)))
+  |}];
+  let positions =
+    winning_moves
+      ~game_kind:non_win.game_kind
+      ~pieces:non_win.pieces
+      ~me:Piece.O
+  in
+  print_s [%sexp (positions : Position.t list)];
+  [%expect {| () |}]
+;;
 
 (* When you've implemented the [losing_moves] function, uncomment this
    test! *)
