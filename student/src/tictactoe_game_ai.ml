@@ -31,10 +31,12 @@ let pick_winning_move_if_possible_strategy
   ~(pieces : Piece.t Position.Map.t)
   : Position.t
   =
-  ignore me;
-  ignore game_kind;
-  ignore pieces;
-  failwith "Implement me!"
+  let winning_moves =
+    Tic_tac_toe_exercises_lib.winning_moves ~me ~game_kind ~pieces
+  in
+  if not (List.is_empty winning_moves)
+  then List.random_element_exn winning_moves
+  else random_move_strategy ~game_kind ~pieces
 ;;
 
 (* disables unused warning. Feel free to delete once it's used. *)
