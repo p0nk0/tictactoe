@@ -411,10 +411,14 @@ let losing_moves
   ~(pieces : Piece.t Position.Map.t)
   : Position.t list
   =
-  ignore me;
-  ignore game_kind;
-  ignore pieces;
-  failwith "Implement me!"
+  let opponent_can_win me game_kind pieces =
+    not (List.is_empty (winning_moves ~me ~game_kind ~pieces))
+  in
+  let f pos =
+    let new_pieces = Map.set pieces ~key:pos ~data:me in
+    opponent_can_win (Piece.flip me) game_kind new_pieces
+  in
+  List.filter (available_moves ~game_kind ~pieces) ~f
 ;;
 
 let exercise_one =
@@ -651,10 +655,24 @@ let%expect_test "winning_move" =
 
 (* When you've implemented the [losing_moves] function, uncomment this
    test! *)
-(*let%expect_test "print_losing" = let positions = losing_moves
-  ~game_kind:non_win.game_kind ~pieces:non_win.pieces ~me:Piece.X in print_s
-  [%sexp (positions : Position.t list)]; [%expect {| () |}]; let positions =
-  losing_moves ~game_kind:non_win.game_kind ~pieces:non_win.pieces
-  ~me:Piece.O in print_s [%sexp (positions : Position.t list)]; [%expect {|
-  ((((row 0) (column 1)) ((row 0) (column 2)) ((row 1) (column 2)) ((row 2)
-  (column 1)))) |}] ;;*)
+let%expect_test "print_losing" =
+  let positions =
+    losing_moves
+      ~game_kind:non_win.game_kind
+      ~pieces:non_win.pieces
+      ~me:Piece.X
+  in
+  print_s [%sexp (positions : Position.t list)];
+  [%expect {| () |}];
+  let positions =
+    losing_moves
+      ~game_kind:non_win.game_kind
+      ~pieces:non_win.pieces
+      ~me:Piece.O
+  in
+  print_s [%sexp (positions : Position.t list)];
+  [%expect
+    {|
+  (((row 0) (column 1)) ((row 0) (column 2)) ((row 1) (column 2))
+   ((row 2) (column 1))) |}]
+;;
