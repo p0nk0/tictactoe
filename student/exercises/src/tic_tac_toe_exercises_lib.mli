@@ -21,6 +21,13 @@ module Evaluation : sig
   val to_string : t -> string
 end
 
+(** places piece onto a game state *)
+val place_piece
+  :  Protocol.Game_state.t
+  -> piece:Protocol.Piece.t
+  -> position:Protocol.Position.t
+  -> Protocol.Game_state.t
+
 (** Evaluates the single state of an Omok/Tic Tac Toe game. *)
 val evaluate
   :  game_kind:Protocol.Game_kind.t
