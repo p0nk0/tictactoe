@@ -385,7 +385,7 @@ Bot-running command
 ```sh
 GAME_SERVER_HOST='ec2-3-215-240-47.compute-1.amazonaws.com'
 GAME_SERVER_PORT=8181
-FAVORITE_POKEMON='bulbasaur' # Pick your own favorite Pokémon!
+FAVORITE_POKEMON='sandshrew' # Pick your own favorite Pokémon!
 ```
 
 Optional: you can run your own private/local game server by running the following script:

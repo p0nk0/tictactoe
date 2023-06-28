@@ -61,22 +61,11 @@ let pick_winning_move_or_block_if_possible_strategy
   if not (List.is_empty winning_moves)
   then List.random_element_exn winning_moves
   else (
-    let losing_moves =
+    let blocking_moves =
       Tic_tac_toe_exercises_lib.losing_moves ~me ~game_kind ~pieces
     in
-    let available_moves =
-      Tic_tac_toe_exercises_lib.available_moves ~game_kind ~pieces
-    in
-    if not (List.is_empty losing_moves)
-    then
-      if List.equal Position.equal available_moves losing_moves
-      then random_move_strategy ~game_kind ~pieces
-      else
-        List.random_element_exn
-          (Set.to_list
-             (Set.diff
-                (Set.of_list (module Position) available_moves)
-                (Set.of_list (module Position) losing_moves)))
+    if not (List.is_empty blocking_moves)
+    then List.random_element_exn blocking_moves
     else random_move_strategy ~game_kind ~pieces)
 ;;
 

@@ -255,30 +255,37 @@ let scan
   (pieces : Piece.t Position.Map.t)
   player
   =
-  let empty = List.init length ~f:(fun i -> i) in
-  let f =
-    match direction with
-    | "row" ->
-      fun i ->
-        { Position.row = start.row + i; Position.column = start.column }
-    | "col" ->
-      fun i ->
-        { Position.row = start.row; Position.column = start.column + i }
-    | "major" ->
-      fun i ->
-        { Position.row = start.row + i; Position.column = start.column + i }
-    | "minor" ->
-      fun i ->
-        { Position.row = start.row + i; Position.column = start.column - i }
-    | _ -> failwith "invalid direction"
-  in
-  let g x y =
-    match y with None -> false | Some y -> x && Piece.equal y player
-  in
-  List.fold
-    (List.map (List.map empty ~f) ~f:(Map.find pieces))
-    ~init:true
-    ~f:g
+  match Map.find pieces start with
+  | None -> false
+  | _ ->
+    let empty = List.init length ~f:(fun i -> i) in
+    let f =
+      match direction with
+      | "row" ->
+        fun i ->
+          { Position.row = start.row + i; Position.column = start.column }
+      | "col" ->
+        fun i ->
+          { Position.row = start.row; Position.column = start.column + i }
+      | "major" ->
+        fun i ->
+          { Position.row = start.row + i
+          ; Position.column = start.column + i
+          }
+      | "minor" ->
+        fun i ->
+          { Position.row = start.row + i
+          ; Position.column = start.column - i
+          }
+      | _ -> failwith "invalid direction"
+    in
+    let g x y =
+      match y with None -> false | Some y -> x && Piece.equal y player
+    in
+    List.fold
+      (List.map (List.map empty ~f) ~f:(Map.find pieces))
+      ~init:true
+      ~f:g
 ;;
 
 (* given start pos, runs scan multiple times*)
@@ -404,21 +411,15 @@ let winning_moves
   List.filter (available_moves ~game_kind ~pieces) ~f
 ;;
 
-(* Exercise 4. *)
+(* Exercise 4. -- CHANGED -- now returns the positions I need to play in to
+   block the opponent *)
 let losing_moves
   ~(me : Piece.t)
   ~(game_kind : Game_kind.t)
   ~(pieces : Piece.t Position.Map.t)
   : Position.t list
   =
-  let opponent_can_win me game_kind pieces =
-    not (List.is_empty (winning_moves ~me ~game_kind ~pieces))
-  in
-  let f pos =
-    let new_pieces = Map.set pieces ~key:pos ~data:me in
-    opponent_can_win (Piece.flip me) game_kind new_pieces
-  in
-  List.filter (available_moves ~game_kind ~pieces) ~f
+  winning_moves ~me:(Piece.flip me) ~game_kind ~pieces
 ;;
 
 let exercise_one =
@@ -671,8 +672,6 @@ let%expect_test "print_losing" =
       ~me:Piece.O
   in
   print_s [%sexp (positions : Position.t list)];
-  [%expect
-    {|
-  (((row 0) (column 1)) ((row 0) (column 2)) ((row 1) (column 2))
-   ((row 2) (column 1))) |}]
+  [%expect {|
+  (((row 1) (column 1))) |}]
 ;;
