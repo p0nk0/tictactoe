@@ -85,9 +85,29 @@ let score
   | Illegal_state -> failwith "score found an illegal state"
 ;;
 
+(* stolen from other file, updated to actually change game state (bruh) *)
+let place_piece (game : Game_state.t) ~piece ~position : Game_state.t =
+  let pieces = Map.add_exn game.pieces ~key:position ~data:piece in
+  let game_status =
+    match
+      Tic_tac_toe_exercises_lib.evaluate ~game_kind:game.game_kind ~pieces
+    with
+    | Game_over { winner = p } ->
+      Game_status.Game_over
+        { winner =
+            (match p with
+             | None -> None
+             | Some p -> Some (p, Set.empty (module Position)))
+        }
+    | Game_continues -> Turn_of (Piece.flip piece)
+    | Illegal_state -> failwith "place_piece encountered illegal state"
+  in
+  { game with pieces; game_status }
+;;
+
 (* if it's a tie i'm making the player X, hopefully that doesn't cause
    issues *)
-let rec minimax (node : Game_state.t) depth maximizing =
+let rec minimax (node : Game_state.t) player depth maximizing =
   let me =
     match node.game_status with
     | Turn_of p -> p
@@ -96,7 +116,7 @@ let rec minimax (node : Game_state.t) depth maximizing =
   in
   if depth = 0
      || match node.game_status with Turn_of _ -> false | _ -> true
-  then score ~me ~game_kind:node.game_kind ~pieces:node.pieces
+  then score ~me:player ~game_kind:node.game_kind ~pieces:node.pieces
   else if maximizing
   then
     List.fold
@@ -106,14 +126,12 @@ let rec minimax (node : Game_state.t) depth maximizing =
             ~pieces:node.pieces)
          ~f:(fun pos ->
          minimax
-           (Tic_tac_toe_exercises_lib.place_piece
-              node
-              ~piece:me
-              ~position:pos)
+           (place_piece node ~piece:me ~position:pos)
+           player
            (depth - 1)
            false))
       ~init:Float.neg_infinity
-      ~f:Float.min
+      ~f:Float.max
   else
     List.fold
       (List.map
@@ -122,10 +140,8 @@ let rec minimax (node : Game_state.t) depth maximizing =
             ~pieces:node.pieces)
          ~f:(fun pos ->
          minimax
-           (Tic_tac_toe_exercises_lib.place_piece
-              node
-              ~piece:me
-              ~position:pos)
+           (place_piece node ~piece:me ~position:pos)
+           player
            (depth - 1)
            false))
       ~init:Float.infinity
@@ -139,34 +155,28 @@ let minimax_strategy
   ~(game_state : Game_state.t)
   : Position.t
   =
-  let winning_moves =
-    Tic_tac_toe_exercises_lib.winning_moves ~me ~game_kind ~pieces
+  (* let winning_moves = Tic_tac_toe_exercises_lib.winning_moves ~me
+     ~game_kind ~pieces in if not (List.is_empty winning_moves) then
+     List.random_element_exn winning_moves else ( *)
+  (* let blocking_moves = Tic_tac_toe_exercises_lib.losing_moves ~me
+     ~game_kind ~pieces in if not (List.is_empty blocking_moves) then
+     List.random_element_exn blocking_moves else ( *)
+  let available_moves =
+    Tic_tac_toe_exercises_lib.available_moves ~game_kind ~pieces
   in
-  if not (List.is_empty winning_moves)
-  then List.random_element_exn winning_moves
-  else (
-    let blocking_moves =
-      Tic_tac_toe_exercises_lib.losing_moves ~me ~game_kind ~pieces
-    in
-    if not (List.is_empty blocking_moves)
-    then List.random_element_exn blocking_moves
-    else (
-      let available_moves =
-        Tic_tac_toe_exercises_lib.available_moves ~game_kind ~pieces
-      in
-      (fun y ->
-        match y with None -> failwith "minimax broke :(" | Some (x, _) -> x)
-        ((List.max_elt
-            (List.map available_moves ~f:(fun pos ->
-               ( pos
-               , minimax
-                   (Tic_tac_toe_exercises_lib.place_piece
-                      game_state
-                      ~piece:me
-                      ~position:pos)
-                   4
-                   true ))))
-           ~compare:(fun (_, x) (_, y) -> Float.compare x y))))
+  let tmp =
+    List.map available_moves ~f:(fun pos ->
+      pos, minimax (place_piece game_state ~piece:me ~position:pos) me 4 true)
+  in
+  List.iter tmp ~f:(fun (x, y) ->
+    print_endline (Position.to_string x ^ Float.to_string y));
+  let max_ele =
+    (fun y ->
+      match y with None -> failwith "minimax broke :(" | Some (x, _) -> x)
+      ((List.max_elt tmp) ~compare:(fun (_, x) (_, y) -> Float.compare x y))
+  in
+  print_endline (Position.to_string max_ele);
+  max_ele
 ;;
 
 let full_strategy
