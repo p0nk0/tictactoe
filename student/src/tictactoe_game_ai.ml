@@ -90,7 +90,11 @@ let place_piece (game : Game_state.t) ~piece ~position : Game_state.t =
   let pieces = Map.add_exn game.pieces ~key:position ~data:piece in
   let game_status =
     match
-      Tic_tac_toe_exercises_lib.evaluate ~game_kind:game.game_kind ~pieces
+      Tic_tac_toe_exercises_lib.evaluate_given_piece
+        ~game_kind:game.game_kind
+        ~pieces
+        ~position
+        ~piece
     with
     | Game_over { winner = p } ->
       Game_status.Game_over
@@ -153,6 +157,7 @@ let minimax_strategy
   ~(game_kind : Game_kind.t)
   ~(pieces : Piece.t Position.Map.t)
   ~(game_state : Game_state.t)
+  ~(depth : int)
   : Position.t
   =
   (* let winning_moves = Tic_tac_toe_exercises_lib.winning_moves ~me
@@ -166,7 +171,12 @@ let minimax_strategy
   in
   let tmp =
     List.map available_moves ~f:(fun pos ->
-      pos, minimax (place_piece game_state ~piece:me ~position:pos) me 4 true)
+      ( pos
+      , minimax
+          (place_piece game_state ~piece:me ~position:pos)
+          me
+          depth
+          true ))
   in
   List.iter tmp ~f:(fun (x, y) ->
     print_endline (Position.to_string x ^ Float.to_string y));
@@ -186,7 +196,7 @@ let full_strategy
   ~(game_state : Game_state.t)
   : Position.t
   =
-  minimax_strategy ~me ~game_kind ~pieces ~game_state
+  minimax_strategy ~me ~game_kind ~pieces ~game_state ~depth:2
 ;;
 
 let _ = pick_winning_move_or_block_if_possible_strategy

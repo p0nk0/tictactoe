@@ -416,59 +416,47 @@ let num_consecutive
   (pieces : Piece.t Position.Map.t)
   player
   =
-  match Map.find pieces start with
-  | None -> 0
-  | _ ->
-    let empty = List.init length ~f:(fun i -> i) in
-    let f =
-      match direction with
-      | "row" ->
-        fun i ->
-          { Position.row = start.row + i; Position.column = start.column }
-      | "col" ->
-        fun i ->
-          { Position.row = start.row; Position.column = start.column + i }
-      | "major" ->
-        fun i ->
-          { Position.row = start.row + i
-          ; Position.column = start.column + i
-          }
-      | "minor" ->
-        fun i ->
-          { Position.row = start.row + i
-          ; Position.column = start.column - i
-          }
-      | "row2" ->
-        fun i ->
-          { Position.row = start.row - i; Position.column = start.column }
-      | "col2" ->
-        fun i ->
-          { Position.row = start.row; Position.column = start.column - i }
-      | "major2" ->
-        fun i ->
-          { Position.row = start.row - i
-          ; Position.column = start.column - i
-          }
-      | "minor2" ->
-        fun i ->
-          { Position.row = start.row - i
-          ; Position.column = start.column + i
-          }
-      | _ -> failwith "invalid direction"
-    in
-    let g x y =
-      match y with
-      | None -> 0
-      | Some y -> x + if Piece.equal y player then 1 else 0
-    in
-    List.fold
-      (List.map (List.map empty ~f) ~f:(Map.find pieces))
-      ~init:0
-      ~f:g
+  let empty = List.init length ~f:(fun i -> i) in
+  let f =
+    match direction with
+    | "row" ->
+      fun i ->
+        { Position.row = start.row + i; Position.column = start.column }
+    | "col" ->
+      fun i ->
+        { Position.row = start.row; Position.column = start.column + i }
+    | "major" ->
+      fun i ->
+        { Position.row = start.row + i; Position.column = start.column + i }
+    | "minor" ->
+      fun i ->
+        { Position.row = start.row + i; Position.column = start.column - i }
+    | "row2" ->
+      fun i ->
+        { Position.row = start.row - i; Position.column = start.column }
+    | "col2" ->
+      fun i ->
+        { Position.row = start.row; Position.column = start.column - i }
+    | "major2" ->
+      fun i ->
+        { Position.row = start.row - i; Position.column = start.column - i }
+    | "minor2" ->
+      fun i ->
+        { Position.row = start.row - i; Position.column = start.column + i }
+    | _ -> failwith "invalid direction"
+  in
+  let g x y =
+    match y with
+    | None -> x
+    | Some y -> x + if Piece.equal y player then 1 else 0
+  in
+  List.fold (List.map (List.map empty ~f) ~f:(Map.find pieces)) ~init:0 ~f:g
 ;;
 
 (* when given a position, only evaluates the impact of that specific piece
-   Assumption: the board is not invalid, or game_over*)
+   Assumption: the board is not invalid, or game_over. This should never
+   return that the other player has won *)
+
 let evaluate_given_piece
   ~(game_kind : Game_kind.t)
   ~(pieces : Piece.t Position.Map.t)
@@ -477,14 +465,12 @@ let evaluate_given_piece
   : Evaluation.t
   =
   let win = Game_kind.win_length game_kind in
-  let scan_dir player dir = num_consecutive win position dir pieces player in
-  let scan_piece = scan_dir piece in
+  let scan_piece dir = num_consecutive win position dir pieces piece in
   let offset_dirs =
     [ "row", "row2"; "col", "col2"; "major", "major2"; "minor", "minor2" ]
   in
-  let f (x, y) = scan_piece x + scan_piece y = win in
-  let win = List.fold (List.map offset_dirs ~f) ~init:false ~f:( || ) in
-  if win
+  let f (x, y) = scan_piece x + scan_piece y - 1 >= win in
+  if List.fold (List.map offset_dirs ~f) ~init:false ~f:( || )
   then Game_over { winner = Some piece }
   else if board_full game_kind pieces
   then Game_over { winner = None }
@@ -638,11 +624,6 @@ let%expect_test "no available_moves" =
   [%expect {| () |}]
 ;;
 
-let%expect_test "print time" =
-  print_endline (Game_state.to_string_hum diag_win_for_o);
-  [%expect {||}]
-;;
-
 (* When you've implemented the [evaluate] function, uncomment the next two
    tests! *)
 let%expect_test "evalulate_win_for_x" =
@@ -776,13 +757,104 @@ let%expect_test "print_losing" =
   (((row 1) (column 1))) |}]
 ;;
 
-let%expect_test "evalulate_2_diag_win_for_o" =
+(* eval 2 tests *)
+let%expect_test "evalulate_2_win_for_x_omok wrong spot" =
   print_endline
     (evaluate_given_piece
-       ~game_kind:diag_win_for_o.game_kind
-       ~pieces:diag_win_for_o.pieces
-       ~position:{ Position.row = 1; Position.column = 1 }
+       ~game_kind:win_for_x_omok.game_kind
+       ~pieces:win_for_x_omok.pieces
+       ~position:{ Position.row = 3; Position.column = 4 }
+       ~piece:Piece.X
+     |> Evaluation.to_string);
+  [%expect {| Game_continues |}]
+;;
+
+let%expect_test "evalulate_2_win_for_x_omok wrong piece" =
+  print_endline
+    (evaluate_given_piece
+       ~game_kind:win_for_x_omok.game_kind
+       ~pieces:win_for_x_omok.pieces
+       ~position:{ Position.row = 2; Position.column = 4 }
        ~piece:Piece.O
      |> Evaluation.to_string);
-  [%expect {| (Game_over(winner(O))) |}]
+  [%expect {| Game_continues |}]
 ;;
+
+let%expect_test "evalulate_2_win_for_x_omok right spot" =
+  print_endline
+    (evaluate_given_piece
+       ~game_kind:win_for_x_omok.game_kind
+       ~pieces:win_for_x_omok.pieces
+       ~position:{ Position.row = 2; Position.column = 4 }
+       ~piece:Piece.X
+     |> Evaluation.to_string);
+  [%expect {| (Game_over(winner(X))) |}]
+;;
+
+let%expect_test "evalulate_2_minor_diag_win_for_x_omok wrong spot" =
+  print_endline
+    (evaluate_given_piece
+       ~game_kind:minor_diag_win_for_x_omok.game_kind
+       ~pieces:minor_diag_win_for_x_omok.pieces
+       ~position:{ Position.row = 11; Position.column = 2 }
+       ~piece:Piece.X
+     |> Evaluation.to_string);
+  [%expect {| Game_continues |}]
+;;
+
+let%expect_test "evalulate_2_minor_diag_win_for_x_omok wrong piece" =
+  print_endline
+    (evaluate_given_piece
+       ~game_kind:minor_diag_win_for_x_omok.game_kind
+       ~pieces:minor_diag_win_for_x_omok.pieces
+       ~position:{ Position.row = 12; Position.column = 2 }
+       ~piece:Piece.O
+     |> Evaluation.to_string);
+  [%expect {| Game_continues |}]
+;;
+
+let%expect_test "evalulate_2_minor_diag_win_for_x_omok right spot" =
+  print_endline
+    (evaluate_given_piece
+       ~game_kind:minor_diag_win_for_x_omok.game_kind
+       ~pieces:minor_diag_win_for_x_omok.pieces
+       ~position:{ Position.row = 12; Position.column = 2 }
+       ~piece:Piece.X
+     |> Evaluation.to_string);
+  [%expect {| (Game_over(winner(X))) |}]
+;;
+
+let%expect_test "evalulate_2_minor_diag_win_for_x_omok right spot 2" =
+  print_endline
+    (evaluate_given_piece
+       ~game_kind:minor_diag_win_for_x_omok.game_kind
+       ~pieces:minor_diag_win_for_x_omok.pieces
+       ~position:{ Position.row = 10; Position.column = 4 }
+       ~piece:Piece.X
+     |> Evaluation.to_string);
+  [%expect {| (Game_over(winner(X))) |}]
+;;
+
+let%expect_test "evalulate_2_minor_diag_win_for_x_omok right spot 3" =
+  print_endline
+    (evaluate_given_piece
+       ~game_kind:minor_diag_win_for_x_omok.game_kind
+       ~pieces:minor_diag_win_for_x_omok.pieces
+       ~position:{ Position.row = 14; Position.column = 0 }
+       ~piece:Piece.X
+     |> Evaluation.to_string);
+  [%expect {| (Game_over(winner(X))) |}]
+;;
+
+let%expect_test "evalulate_2_minor_diag_win_for_x_omok right spot 4" =
+  print_endline
+    (evaluate_given_piece
+       ~game_kind:minor_diag_win_for_x_omok.game_kind
+       ~pieces:minor_diag_win_for_x_omok.pieces
+       ~position:{ Position.row = 11; Position.column = 3 }
+       ~piece:Piece.X
+     |> Evaluation.to_string);
+  [%expect {| (Game_over(winner(X))) |}]
+;;
+(* let%expect_test "print time" = print_endline (Game_state.to_string_hum
+   minor_diag_win_for_x_omok); [%expect {||}] ;; *)

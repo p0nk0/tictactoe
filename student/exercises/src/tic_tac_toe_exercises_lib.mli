@@ -34,6 +34,15 @@ val evaluate
   -> pieces:Protocol.Piece.t Protocol.Position.Map.t
   -> Evaluation.t
 
+(** Evaluates the impact of a single pice being placed. Will never return
+    that the opponent has won. *)
+val evaluate_given_piece
+  :  game_kind:Protocol.Game_kind.t
+  -> pieces:Protocol.Piece.t Protocol.Position.Map.t
+  -> position:Protocol.Position.t
+  -> piece:Protocol.Piece.t
+  -> Evaluation.t
+
 (** Finds all of the moves that would win in the next move. *)
 val winning_moves
   :  me:Piece.t
