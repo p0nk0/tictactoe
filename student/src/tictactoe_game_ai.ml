@@ -81,7 +81,8 @@ let score
      | None -> 0.0
      | Some p ->
        if Piece.equal p me then Float.infinity else Float.neg_infinity)
-  | Game_continues -> 0.0 (* TODO: heuristic *)
+  | Game_continues ->
+    Tic_tac_toe_exercises_lib.calculate_score me game_kind pieces
   | Illegal_state -> failwith "score found an illegal state"
 ;;
 
@@ -90,11 +91,7 @@ let place_piece (game : Game_state.t) ~piece ~position : Game_state.t =
   let pieces = Map.add_exn game.pieces ~key:position ~data:piece in
   let game_status =
     match
-      Tic_tac_toe_exercises_lib.evaluate_given_piece
-        ~game_kind:game.game_kind
-        ~pieces
-        ~position
-        ~piece
+      Tic_tac_toe_exercises_lib.evaluate ~game_kind:game.game_kind ~pieces
     with
     | Game_over { winner = p } ->
       Game_status.Game_over
@@ -118,38 +115,40 @@ let rec minimax (node : Game_state.t) player depth maximizing =
     | Game_status.Game_over { winner = n } ->
       (match n with None -> Piece.X | Some (p, _) -> p)
   in
-  if depth = 0
+  if depth <= 0
      || match node.game_status with Turn_of _ -> false | _ -> true
   then score ~me:player ~game_kind:node.game_kind ~pieces:node.pieces
-  else if maximizing
-  then
-    List.fold
-      (List.map
-         (Tic_tac_toe_exercises_lib.available_moves
-            ~game_kind:node.game_kind
-            ~pieces:node.pieces)
-         ~f:(fun pos ->
-         minimax
-           (place_piece node ~piece:me ~position:pos)
-           player
-           (depth - 1)
-           false))
-      ~init:Float.neg_infinity
-      ~f:Float.max
-  else
-    List.fold
-      (List.map
-         (Tic_tac_toe_exercises_lib.available_moves
-            ~game_kind:node.game_kind
-            ~pieces:node.pieces)
-         ~f:(fun pos ->
-         minimax
-           (place_piece node ~piece:me ~position:pos)
-           player
-           (depth - 1)
-           false))
-      ~init:Float.infinity
-      ~f:Float.min
+  else (
+    let moves =
+      match node.game_kind with
+      | Tic_tac_toe -> Tic_tac_toe_exercises_lib.available_moves
+      | Omok -> Tic_tac_toe_exercises_lib.good_moves
+    in
+    if maximizing
+    then
+      List.fold
+        (List.map
+           (moves ~game_kind:node.game_kind ~pieces:node.pieces)
+           ~f:(fun pos ->
+           minimax
+             (place_piece node ~piece:me ~position:pos)
+             player
+             (depth - 1)
+             false))
+        ~init:Float.neg_infinity
+        ~f:Float.max
+    else
+      List.fold
+        (List.map
+           (moves ~game_kind:node.game_kind ~pieces:node.pieces)
+           ~f:(fun pos ->
+           minimax
+             (place_piece node ~piece:me ~position:pos)
+             player
+             (depth - 1)
+             false))
+        ~init:Float.infinity
+        ~f:Float.min)
 ;;
 
 let minimax_strategy
@@ -160,14 +159,8 @@ let minimax_strategy
   ~(depth : int)
   : Position.t
   =
-  (* let winning_moves = Tic_tac_toe_exercises_lib.winning_moves ~me
-     ~game_kind ~pieces in if not (List.is_empty winning_moves) then
-     List.random_element_exn winning_moves else ( *)
-  (* let blocking_moves = Tic_tac_toe_exercises_lib.losing_moves ~me
-     ~game_kind ~pieces in if not (List.is_empty blocking_moves) then
-     List.random_element_exn blocking_moves else ( *)
   let available_moves =
-    Tic_tac_toe_exercises_lib.available_moves ~game_kind ~pieces
+    Tic_tac_toe_exercises_lib.good_moves ~game_kind ~pieces
   in
   let tmp =
     List.map available_moves ~f:(fun pos ->
@@ -196,7 +189,16 @@ let full_strategy
   ~(game_state : Game_state.t)
   : Position.t
   =
-  minimax_strategy ~me ~game_kind ~pieces ~game_state ~depth:2
+  if Map.is_empty pieces
+  then (
+    match game_kind with
+    | Game_kind.Omok ->
+      List.random_element_exn
+        (Tic_tac_toe_exercises_lib.available_moves ~game_kind ~pieces)
+    | Tic_tac_toe -> { Position.row = 0; Position.column = 1 })
+  else (
+    let depth = match game_kind with Tic_tac_toe -> 11 | Omok -> 2 in
+    minimax_strategy ~me ~game_kind ~pieces ~game_state ~depth)
 ;;
 
 let _ = pick_winning_move_or_block_if_possible_strategy

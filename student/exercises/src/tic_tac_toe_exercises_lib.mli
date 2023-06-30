@@ -11,6 +11,12 @@ val available_moves
   -> pieces:Piece.t Position.Map.t
   -> Position.t list
 
+(** Finds all slots adjacent to another tile in a tic tac toe/omok game. *)
+val good_moves
+  :  game_kind:Game_kind.t
+  -> pieces:Piece.t Position.Map.t
+  -> Position.t list
+
 module Evaluation : sig
   (* Represents the evaluation of a tic tac toe / omok game. *)
   type t =
@@ -42,6 +48,14 @@ val evaluate_given_piece
   -> position:Protocol.Position.t
   -> piece:Protocol.Piece.t
   -> Evaluation.t
+
+(** Calculates the score of a given board (n = length of longest run, returns
+    n*n) *)
+val calculate_score
+  :  Protocol.Piece.t
+  -> Protocol.Game_kind.t
+  -> Protocol.Piece.t Protocol.Position.Map.t
+  -> float
 
 (** Finds all of the moves that would win in the next move. *)
 val winning_moves
